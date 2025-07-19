@@ -499,7 +499,8 @@ postgresql://username:password@hostname:port/database?sslmode=require
 
 ### **Built with ❤️ for the Indian Trading Community**
 
-**[🚀 Try Live Demo](https://your-app-name.streamlit.app)** | **[⭐ Star on GitHub](https://github.com/yourusername/indian-stock-dashboard)** | **[🐛 Report Bug](https://github.com/yourusername/indian-stock-dashboard/issues)**
+**[🚀 Try Live Demo](https://411-stock-analyzer.streamlit.app)** | **[⭐ Star on GitHub](https://github.com/411sst/Stock-Analyzer)** | 
+**[🐛 Report Bug](https://github.com/411sst/Stock-Analyzer)**
 
 *Made with Python 🐍, Streamlit ⚡, and TensorFlow 🧠*
 
