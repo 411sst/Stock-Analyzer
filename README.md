@@ -495,12 +495,6 @@ postgresql://username:password@hostname:port/database?sslmode=require
 
 ---
 
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/indian-stock-dashboard&type=Date)](https://star-history.com/#yourusername/indian-stock-dashboard&Date)
-
----
-
 <div align="center">
 
 ### **Built with ❤️ for the Indian Trading Community**
