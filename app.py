@@ -578,22 +578,33 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                             else:
                                 st.metric("📊 Data Points", f"{len(close_data)}")
 
-                        # FIXED CHARTS SECTION
+                        # FIXED CHARTS SECTION WITH DEBUGGING
                         st.markdown("---")
                         st.subheader("📈 Price Prediction Visualization")
 
                         try:
-                            # Create prediction chart with proper data handling
+                            # Debug: Check data availability first
+                            st.write("**🔍 Data Debug Info:**")
+                            st.write(f"✅ Historical data points: {len(close_data)}")
+                            st.write(f"✅ Prediction points: {len(prediction_result.get('predictions', []))}")
+                            st.write(f"✅ Current price: ₹{current_price:.2f}")
+                            st.write(f"✅ Predicted price: ₹{predicted_price:.2f}")
+                            
+                            # Create the chart
                             fig = go.Figure()
                             
-                            # Historical data (last 30 days)
+                            # STEP 1: Add Historical Data (COMPLETELY FIXED)
                             historical_data = close_data.tail(30)
-                            
                             if len(historical_data) > 0:
-                                hist_dates = historical_data.index
-                                hist_prices = historical_data.values
+                                # Convert to simple Python lists for Plotly
+                                hist_dates = historical_data.index.tolist()
+                                hist_prices = historical_data.values.tolist()
                                 
-                                # Add historical prices line
+                                st.write(f"📊 Adding {len(hist_prices)} historical data points")
+                                st.write(f"📅 Date range: {hist_dates[0]} to {hist_dates[-1]}")
+                                st.write(f"💰 Price range: ₹{min(hist_prices):.2f} to ₹{max(hist_prices):.2f}")
+                                
+                                # Add historical line
                                 fig.add_trace(go.Scatter(
                                     x=hist_dates,
                                     y=hist_prices,
@@ -602,35 +613,48 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                     line=dict(color='#3b82f6', width=3),
                                     hovertemplate='<b>Historical</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>'
                                 ))
+                                
+                                st.success(f"✅ Historical data plotted successfully!")
                             
-                            # Add prediction data
-                            pred_dates = prediction_result.get('dates', [])
+                            # STEP 2: Add Prediction Data (COMPLETELY FIXED)
                             predictions = prediction_result.get('predictions', [])
-                            
-                            if len(predictions) > 0 and len(pred_dates) > 0:
-                                # Convert predictions to proper format
+                            if len(predictions) > 0:
+                                # Convert to simple list, handle all data types
                                 if isinstance(predictions, np.ndarray):
-                                    pred_values = predictions.flatten()
+                                    pred_values = predictions.flatten().tolist()
+                                elif isinstance(predictions, list):
+                                    pred_values = predictions
                                 else:
-                                    pred_values = np.array(predictions).flatten()
+                                    pred_values = list(predictions)
                                 
-                                # Remove any NaN values
-                                valid_indices = ~np.isnan(pred_values)
-                                pred_values = pred_values[valid_indices]
+                                # Clean the predictions - remove invalid values
+                                clean_predictions = []
+                                for p in pred_values:
+                                    if isinstance(p, (int, float)) and not (np.isnan(p) or np.isinf(p)):
+                                        clean_predictions.append(float(p))
                                 
-                                if len(pred_values) > 0:
-                                    # Ensure dates match predictions
-                                    if len(pred_dates) != len(pred_values):
-                                        start_date = historical_data.index[-1] if len(historical_data) > 0 else datetime.now()
-                                        pred_dates = [start_date + timedelta(days=i+1) for i in range(len(pred_values))]
-                                    else:
-                                        # Take only the valid dates
-                                        pred_dates = [pred_dates[i] for i in range(len(pred_values)) if valid_indices[i]]
+                                if len(clean_predictions) > 0:
+                                    st.write(f"🔮 Adding {len(clean_predictions)} prediction points")
+                                    st.write(f"💰 Prediction range: ₹{min(clean_predictions):.2f} to ₹{max(clean_predictions):.2f}")
+                                    
+                                    # Generate prediction dates (business days only)
+                                    last_hist_date = historical_data.index[-1] if len(historical_data) > 0 else datetime.now()
+                                    pred_dates = []
+                                    current_date = last_hist_date
+                                    
+                                    for i in range(len(clean_predictions)):
+                                        current_date += timedelta(days=1)
+                                        # Skip weekends for business days
+                                        while current_date.weekday() > 4:  # 5=Saturday, 6=Sunday
+                                            current_date += timedelta(days=1)
+                                        pred_dates.append(current_date)
+                                    
+                                    st.write(f"📅 Prediction dates: {pred_dates[0]} to {pred_dates[-1]}")
                                     
                                     # Add prediction line
                                     fig.add_trace(go.Scatter(
                                         x=pred_dates,
-                                        y=pred_values,
+                                        y=clean_predictions,
                                         mode='lines+markers',
                                         name=f'AI Predictions ({prediction_period})',
                                         line=dict(color='#ef4444', width=3),
@@ -638,54 +662,52 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                         hovertemplate='<b>Prediction</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>'
                                     ))
                                     
+                                    st.success(f"✅ Prediction data plotted successfully!")
+                                    
                                     # Add confidence bands
-                                    if confidence > 0.3 and len(pred_values) > 1:
+                                    if confidence > 0.3 and len(clean_predictions) > 1:
                                         try:
-                                            pred_std = np.std(pred_values)
-                                            band_width = pred_std * (1.2 - confidence)  # Lower confidence = wider bands
+                                            pred_std = np.std(clean_predictions)
+                                            band_width = pred_std * (1.5 - confidence)  # Lower confidence = wider bands
                                             
-                                            upper_band = pred_values + band_width
-                                            lower_band = pred_values - band_width
+                                            upper_band = [p + band_width for p in clean_predictions]
+                                            lower_band = [p - band_width for p in clean_predictions]
                                             
-                                            # Add upper band (invisible line for fill reference)
+                                            # Add confidence area
                                             fig.add_trace(go.Scatter(
-                                                x=pred_dates,
-                                                y=upper_band,
-                                                mode='lines',
-                                                name='Upper Confidence',
-                                                line=dict(color='rgba(239, 68, 68, 0)', width=0),
-                                                showlegend=False,
-                                                hoverinfo='skip'
-                                            ))
-                                            
-                                            # Add lower band with fill
-                                            fig.add_trace(go.Scatter(
-                                                x=pred_dates,
-                                                y=lower_band,
-                                                mode='lines',
-                                                name='Confidence Band',
-                                                line=dict(color='rgba(239, 68, 68, 0)', width=0),
-                                                fill='tonexty',
+                                                x=pred_dates + pred_dates[::-1],  # x, then x reversed
+                                                y=upper_band + lower_band[::-1],  # upper, then lower reversed
+                                                fill='toself',
                                                 fillcolor='rgba(239, 68, 68, 0.15)',
-                                                showlegend=True,
+                                                line=dict(color='rgba(255,255,255,0)'),
+                                                name='Confidence Band',
                                                 hoverinfo='skip'
                                             ))
-                                        except Exception:
-                                            pass  # Skip confidence bands if calculation fails
+                                            
+                                            st.success(f"✅ Confidence bands added!")
+                                            
+                                        except Exception as band_error:
+                                            st.info(f"Confidence bands skipped: {band_error}")
+                                else:
+                                    st.error("❌ No valid prediction data after cleaning")
+                            else:
+                                st.error("❌ No prediction data found")
                             
-                            # Add current price reference line
-                            if len(historical_data) > 0 and len(predictions) > 0:
-                                all_dates = list(historical_data.index) + list(pred_dates[:len(pred_values)])
-                                current_price_line = [current_price] * len(all_dates)
+                            # STEP 3: Add Current Price Reference Line
+                            if len(historical_data) > 0:
+                                all_x_data = hist_dates + (pred_dates if 'pred_dates' in locals() else [])
+                                current_price_line = [current_price] * len(all_x_data)
                                 
                                 fig.add_trace(go.Scatter(
-                                    x=all_dates,
+                                    x=all_x_data,
                                     y=current_price_line,
                                     mode='lines',
                                     name='Current Price',
                                     line=dict(color='#10b981', width=2, dash='dot'),
                                     hovertemplate='Current Price: ₹%{y:.2f}<extra></extra>'
                                 ))
+                                
+                                st.success(f"✅ Current price reference line added!")
                             
                             # Update chart layout
                             fig.update_layout(
@@ -708,21 +730,63 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                     x=1
                                 ),
                                 plot_bgcolor='rgba(0,0,0,0)',
-                                paper_bgcolor='rgba(0,0,0,0)'
+                                paper_bgcolor='rgba(0,0,0,0)',
+                                showlegend=True
                             )
                             
                             # Display the chart
                             st.plotly_chart(fig, use_container_width=True)
+                            st.success("🎉 Chart generated successfully!")
                             
                         except Exception as chart_error:
-                            st.error(f"Chart generation error: {str(chart_error)}")
-                            # Debug information
-                            with st.expander("🔧 Chart Debug Info"):
-                                st.write(f"Historical data length: {len(close_data) if close_data is not None else 0}")
-                                st.write(f"Predictions length: {len(prediction_result.get('predictions', []))}")
-                                st.write(f"Dates length: {len(prediction_result.get('dates', []))}")
-                                st.write(f"Current price: {current_price}")
-                                st.write(f"Confidence: {confidence}")
+                            st.error(f"❌ Chart generation error: {str(chart_error)}")
+                            
+                            # Comprehensive debug information
+                            with st.expander("🔧 Full Debug Information"):
+                                st.write("**Data Types:**")
+                                st.write(f"- close_data type: {type(close_data)}")
+                                st.write(f"- prediction_result type: {type(prediction_result)}")
+                                st.write(f"- predictions type: {type(prediction_result.get('predictions', 'None'))}")
+                                
+                                st.write("**Data Shapes:**")
+                                st.write(f"- close_data length: {len(close_data) if close_data is not None else 'None'}")
+                                st.write(f"- predictions length: {len(prediction_result.get('predictions', []))}")
+                                
+                                st.write("**Sample Data:**")
+                                if len(close_data) > 0:
+                                    st.write(f"- Last 3 historical prices: {close_data.tail(3).tolist()}")
+                                
+                                predictions_sample = prediction_result.get('predictions', [])
+                                if len(predictions_sample) > 0:
+                                    if isinstance(predictions_sample, np.ndarray):
+                                        sample_preds = predictions_sample.flatten()[:3].tolist()
+                                    else:
+                                        sample_preds = list(predictions_sample)[:3]
+                                    st.write(f"- First 3 predictions: {sample_preds}")
+                                
+                                st.write("**Error Details:**")
+                                st.code(str(chart_error))
+                                
+                                # Try to create a simple fallback chart
+                                st.write("**Attempting fallback chart...**")
+                                try:
+                                    simple_fig = go.Figure()
+                                    simple_fig.add_trace(go.Scatter(
+                                        x=[datetime.now(), datetime.now() + timedelta(days=1)],
+                                        y=[current_price, predicted_price],
+                                        mode='lines+markers',
+                                        name='Simple Prediction',
+                                        line=dict(color='red', width=3)
+                                    ))
+                                    simple_fig.update_layout(
+                                        title="Fallback Chart - Basic Prediction",
+                                        template='plotly_dark',
+                                        height=300
+                                    )
+                                    st.plotly_chart(simple_fig, use_container_width=True)
+                                    st.info("✅ Fallback chart displayed successfully")
+                                except Exception as fallback_error:
+                                    st.error(f"❌ Even fallback chart failed: {fallback_error}")
 
                         # Risk Analysis Dashboard
                         if risk_metrics and show_risk_metrics:
