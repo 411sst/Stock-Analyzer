@@ -4,79 +4,129 @@ import bcrypt
 import validators
 import re
 from datetime import datetime
+import os
+from urllib.parse import urlparse
 
 class AuthHandler:
     def __init__(self):
-        # Get the connection string from Streamlit secrets
-        self.db_url = st.secrets["database"]["connection_string"]
-        self._initialize_db()
+        # Get the connection string from Streamlit secrets or environment
+        try:
+            # First try Streamlit secrets (for cloud deployment)
+            self.db_url = st.secrets["database"]["connection_string"]
+        except (KeyError, FileNotFoundError):
+            # Fallback to environment variable (for local development)
+            self.db_url = os.getenv("DATABASE_URL")
+            if not self.db_url:
+                st.error("❌ Database connection string not found!")
+                st.info("Please add your PostgreSQL connection string to Streamlit secrets.")
+                st.stop()
+        
+        # Test connection and initialize
+        if self._test_connection():
+            self._initialize_db()
+        else:
+            st.error("❌ Cannot connect to database!")
+            st.stop()
+
+    def _test_connection(self):
+        """Test database connection"""
+        try:
+            conn = self._get_connection()
+            conn.close()
+            return True
+        except Exception as e:
+            st.error(f"Database connection failed: {str(e)}")
+            return False
 
     def _get_connection(self):
-        """Establish a connection to the PostgreSQL database."""
-        return psycopg2.connect(self.db_url)
+        """Establish a connection to the PostgreSQL database with error handling."""
+        try:
+            # Parse the URL to handle different formats
+            if self.db_url.startswith('postgresql://'):
+                # Convert postgresql:// to postgres:// if needed (some services use this)
+                url = self.db_url.replace('postgresql://', 'postgres://')
+            else:
+                url = self.db_url
+            
+            conn = psycopg2.connect(
+                url,
+                sslmode='require',  # Required for most cloud PostgreSQL services
+                connect_timeout=10  # 10 second timeout
+            )
+            return conn
+        except psycopg2.OperationalError as e:
+            st.error(f"Database connection error: {str(e)}")
+            raise
+        except Exception as e:
+            st.error(f"Unexpected database error: {str(e)}")
+            raise
 
     def _initialize_db(self):
-        """Initialize database tables"""
-        # Connect to the PostgreSQL database
-        conn = self._get_connection()
-        cursor = conn.cursor()
+        """Initialize database tables with error handling"""
+        try:
+            conn = self._get_connection()
+            cursor = conn.cursor()
 
-        # Users table (PostgreSQL syntax)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                last_login TIMESTAMP WITH TIME ZONE,
-                is_active BOOLEAN DEFAULT TRUE
-            )
-        """)
+            # Users table (PostgreSQL syntax)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    email TEXT UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP WITH TIME ZONE,
+                    is_active BOOLEAN DEFAULT TRUE
+                )
+            """)
 
-        # User portfolios table (PostgreSQL syntax)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS user_portfolios (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER,
-                symbol TEXT,
-                quantity REAL,
-                buy_price REAL,
-                buy_date DATE,
-                notes TEXT,
-                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-            )
-        """)
+            # User portfolios table (PostgreSQL syntax)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS user_portfolios (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER,
+                    symbol TEXT,
+                    quantity REAL,
+                    buy_price REAL,
+                    buy_date DATE,
+                    notes TEXT,
+                    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            """)
 
-        # User watchlists table (PostgreSQL syntax)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS user_watchlists (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER,
-                symbol TEXT,
-                added_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                alert_price REAL,
-                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-            )
-        """)
+            # User watchlists table (PostgreSQL syntax)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS user_watchlists (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER,
+                    symbol TEXT,
+                    added_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    alert_price REAL,
+                    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            """)
 
-        # User preferences table (PostgreSQL syntax)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS user_preferences (
-                user_id INTEGER PRIMARY KEY,
-                theme TEXT DEFAULT 'dark',
-                default_mode TEXT DEFAULT 'Beginner',
-                email_notifications BOOLEAN DEFAULT TRUE,
-                FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-            )
-        """)
+            # User preferences table (PostgreSQL syntax)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS user_preferences (
+                    user_id INTEGER PRIMARY KEY,
+                    theme TEXT DEFAULT 'dark',
+                    default_mode TEXT DEFAULT 'Beginner',
+                    email_notifications BOOLEAN DEFAULT TRUE,
+                    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            """)
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+        except Exception as e:
+            st.error(f"Database initialization failed: {str(e)}")
+            raise
 
     def register_user(self, username, email, password):
-        """Register new user with validation"""
+        """Register new user with enhanced error handling"""
         # Input validation
         if not username or not email or not password:
             return False, "All fields are required"
@@ -129,11 +179,14 @@ class AuthHandler:
 
             return True, "Registration successful! Please login."
 
+        except psycopg2.IntegrityError as e:
+            return False, "Username or email already exists"
         except Exception as e:
+            st.error(f"Registration error: {str(e)}")
             return False, f"Registration failed: {str(e)}"
 
     def verify_user(self, username, password):
-        """Verify user credentials"""
+        """Verify user credentials with enhanced error handling"""
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
@@ -172,6 +225,7 @@ class AuthHandler:
                 return None, "Incorrect password"
 
         except Exception as e:
+            st.error(f"Login error: {str(e)}")
             return None, f"Login failed: {str(e)}"
 
     def get_user_info(self, user_id):
