@@ -1,4 +1,4 @@
-#utils/risk_analysis.py
+# utils/risk_analysis.py - FIXED DETERMINISTIC VERSION
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -7,16 +7,21 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
 import warnings
+import hashlib
 warnings.filterwarnings('ignore')
 
 class RiskAnalyzer:
-    """Enhanced risk analysis with dynamic calculations"""
+    """Enhanced risk analysis with DETERMINISTIC calculations"""
     
     def __init__(self):
         self.risk_free_rate = 0.06  # 6% annual risk-free rate for India
+    
+    def _create_deterministic_seed(self, data_char):
+        """Create deterministic seed from data characteristics"""
+        return int(hashlib.md5(str(data_char).encode()).hexdigest()[:8], 16) % 10000
         
     def calculate_var(self, returns, confidence_level=0.05, method='historical'):
-        """Calculate Value at Risk with improved accuracy"""
+        """Calculate Value at Risk with DETERMINISTIC accuracy"""
         try:
             returns = returns.dropna()
             if len(returns) < 10:
@@ -36,8 +41,12 @@ class RiskAnalyzer:
             else:
                 mu = returns.mean()
                 sigma = returns.std()
-                simulated_returns = np.random.normal(mu, sigma, 10000)
+                # Use deterministic "simulation" instead of random
+                seed = self._create_deterministic_seed(f"{mu}_{sigma}_{len(returns)}")
+                np.random.seed(seed)
+                simulated_returns = np.random.normal(mu, sigma, 1000)
                 var_1d = abs(np.percentile(simulated_returns, confidence_level * 100))
+                np.random.seed(None)  # Reset
             
             # Scale to different time horizons
             var_5d = var_1d * np.sqrt(5)
@@ -65,7 +74,7 @@ class RiskAnalyzer:
             }
     
     def calculate_max_drawdown(self, prices):
-        """Calculate maximum drawdown"""
+        """Calculate maximum drawdown - DETERMINISTIC"""
         try:
             if len(prices) < 2:
                 return 0.08  # Default 8%
@@ -82,7 +91,7 @@ class RiskAnalyzer:
             return 0.08
     
     def volatility_regime_detection(self, returns, window=20):
-        """Enhanced volatility regime detection"""
+        """Enhanced volatility regime detection - DETERMINISTIC"""
         try:
             returns = returns.dropna()
             if len(returns) < window:
@@ -111,7 +120,7 @@ class RiskAnalyzer:
             # Avoid division by zero
             vol_ratio = current_vol / historical_vol if historical_vol > 0 else 1.0
             
-            # Classify regime
+            # Classify regime (deterministic thresholds)
             if vol_ratio > 1.4:
                 regime = 'high_volatility'
             elif vol_ratio < 0.8:
@@ -135,10 +144,10 @@ class RiskAnalyzer:
             }
     
     def stress_test_scenarios(self, current_price, predictions):
-        """Generate realistic stress test scenarios with proper validation"""
+        """Generate DETERMINISTIC stress test scenarios"""
         try:
             if len(predictions) == 0:
-                # Create scenarios based on current price only
+                # Create deterministic scenarios based on current price only
                 scenarios = {
                     'bull_market': {
                         'final_price': current_price * 1.15,
@@ -178,7 +187,7 @@ class RiskAnalyzer:
             # Calculate base prediction return
             base_return = ((predictions[-1] - current_price) / current_price) * 100
             
-            # Create realistic scenarios based on predictions
+            # Create DETERMINISTIC scenarios based on predictions
             scenarios = {}
             
             # Bull market: 20% better than prediction
@@ -226,7 +235,7 @@ class RiskAnalyzer:
                 'prices': [current_price * (1 - 0.40 * i / len(predictions)) for i in range(1, len(predictions) + 1)]
             }
             
-            # Validate all scenarios
+            # Validate all scenarios (deterministic)
             for scenario_name, scenario_data in scenarios.items():
                 if not isinstance(scenario_data, dict):
                     continue
@@ -242,7 +251,7 @@ class RiskAnalyzer:
             return scenarios
             
         except Exception as e:
-            # Return fallback scenarios
+            # Return deterministic fallback scenarios
             return {
                 'bull_market': {
                     'final_price': current_price * 1.12,
@@ -266,18 +275,22 @@ class RiskAnalyzer:
                 }
             }
     
-    def _calculate_dynamic_risk_score(self, var_metrics, vol_regime, max_drawdown, 
-                                      predictions, current_price, confidence):
-        """Calculate dynamic risk score based on multiple factors - FIXED VERSION"""
+    def _calculate_deterministic_risk_score(self, var_metrics, vol_regime, max_drawdown, 
+                                           predictions, current_price, confidence):
+        """Calculate COMPLETELY deterministic risk score"""
         try:
+            # Create deterministic seed from stable inputs
+            stable_inputs = f"{len(predictions)}_{current_price}_{confidence}_{max_drawdown}"
+            seed = self._create_deterministic_seed(stable_inputs)
+            
             risk_score = 0
             
-            # Component 1: VaR component (0-25 points)
+            # Component 1: VaR component (0-25 points) - DETERMINISTIC
             var_1d = var_metrics.get('var_1d', 0.025)
             var_component = min(25, var_1d * 800)  # Scale VaR appropriately
             risk_score += var_component
             
-            # Component 2: Volatility regime component (0-25 points)
+            # Component 2: Volatility regime component (0-25 points) - DETERMINISTIC
             vol_regime_name = vol_regime.get('regime', 'normal')
             vol_ratio = vol_regime.get('vol_ratio', 1.0)
             
@@ -290,11 +303,11 @@ class RiskAnalyzer:
             
             risk_score += vol_component
             
-            # Component 3: Max drawdown component (0-25 points)
+            # Component 3: Max drawdown component (0-25 points) - DETERMINISTIC
             dd_component = min(25, max_drawdown * 150)  # Scale drawdown
             risk_score += dd_component
             
-            # Component 4: Prediction volatility component (0-25 points)
+            # Component 4: Prediction volatility component (0-25 points) - DETERMINISTIC
             try:
                 if len(predictions) > 1:
                     pred_array = np.array(predictions)
@@ -312,11 +325,11 @@ class RiskAnalyzer:
             except:
                 risk_score += 12
             
-            # Component 5: Confidence adjustment (-8 to +12 points)
+            # Component 5: Confidence adjustment (-8 to +12 points) - DETERMINISTIC
             conf_adjustment = (0.7 - confidence) * 15  # Lower confidence = higher risk
             risk_score += conf_adjustment
             
-            # Component 6: Price change magnitude (+0 to +15 points)
+            # Component 6: Price change magnitude (+0 to +15 points) - DETERMINISTIC
             try:
                 if len(predictions) > 0:
                     price_change_pct = abs(((predictions[-1] - current_price) / current_price) * 100)
@@ -329,61 +342,62 @@ class RiskAnalyzer:
             except:
                 pass
             
-            # Ensure final score is in reasonable range (20-90)
+            # Ensure final score is in reasonable range (20-90) - DETERMINISTIC
             final_score = max(20, min(90, risk_score))
             
-            # Add some controlled randomness to avoid static scores
-            randomness = (hash(str(current_price) + str(len(predictions))) % 10) - 5
-            final_score = max(20, min(90, final_score + randomness))
+            # Add deterministic component instead of random
+            deterministic_component = ((seed % 10) - 5)  # -5 to +5, deterministic
+            final_score = max(20, min(90, final_score + deterministic_component))
             
             return int(final_score)
             
         except Exception as e:
-            # Fallback calculation using available data
+            # Deterministic fallback calculation
             try:
                 base_score = 45
                 
-                # Adjust based on confidence
+                # Adjust based on confidence (deterministic)
                 if confidence < 0.5:
                     base_score += 15
                 elif confidence > 0.8:
                     base_score -= 10
                 
-                # Adjust based on volatility
+                # Adjust based on volatility (deterministic)
                 vol_ratio = vol_regime.get('vol_ratio', 1.0) if vol_regime else 1.0
                 if vol_ratio > 1.3:
                     base_score += 12
                 elif vol_ratio < 0.8:
                     base_score -= 8
                 
-                # Adjust based on VaR
+                # Adjust based on VaR (deterministic)
                 var_1d = var_metrics.get('var_1d', 0.025) if var_metrics else 0.025
                 if var_1d > 0.04:
                     base_score += 10
                 
-                # Add deterministic but variable component
-                hash_component = (hash(str(current_price)) % 20) - 10
-                base_score += hash_component
+                # Add deterministic component based on current price
+                deterministic_component = (int(str(int(current_price))[:2]) % 20) - 10
+                base_score += deterministic_component
                 
                 return max(25, min(85, base_score))
                 
             except:
-                # Ultimate fallback - return variable score based on current price
-                return max(30, min(80, 40 + (int(current_price) % 30)))
+                # Ultimate deterministic fallback
+                price_component = (int(current_price) % 30) + 30  # 30-60 range
+                return max(30, min(80, price_component))
     
     def risk_metrics_dashboard(self, stock_data, predictions):
-        """Generate comprehensive risk metrics"""
+        """Generate DETERMINISTIC comprehensive risk metrics"""
         try:
             returns = stock_data.pct_change().dropna()
             current_price = float(stock_data.iloc[-1])
             
-            # Calculate all components
+            # Calculate all components (all deterministic now)
             var_metrics = self.calculate_var(returns, method='historical')
             max_dd = self.calculate_max_drawdown(stock_data)
             vol_regime = self.volatility_regime_detection(returns)
             stress_scenarios = self.stress_test_scenarios(current_price, predictions)
             
-            # Estimate confidence from prediction consistency
+            # Estimate confidence from prediction consistency (deterministic)
             if len(predictions) > 1:
                 pred_std = np.std(predictions)
                 pred_mean = np.mean(predictions)
@@ -395,12 +409,12 @@ class RiskAnalyzer:
             else:
                 estimated_confidence = 0.5
             
-            # Calculate dynamic risk score
-            risk_score = self._calculate_dynamic_risk_score(
+            # Calculate DETERMINISTIC risk score
+            risk_score = self._calculate_deterministic_risk_score(
                 var_metrics, vol_regime, max_dd, predictions, current_price, estimated_confidence
             )
             
-            # Prediction risk assessment
+            # Prediction risk assessment (deterministic)
             try:
                 pred_volatility = np.std(predictions) / np.mean(predictions) if len(predictions) > 0 and np.mean(predictions) > 0 else 0
             except:
@@ -415,39 +429,40 @@ class RiskAnalyzer:
                 'risk_score': risk_score,
                 'estimated_confidence': estimated_confidence,
                 'risk_components': {
-                    'var_component': min(25, var_metrics.get('var_1d', 0.025) * 1000),
+                    'var_component': min(25, var_metrics.get('var_1d', 0.025) * 800),
                     'volatility_component': 15 if vol_regime.get('regime') == 'high_volatility' else 10,
-                    'drawdown_component': min(25, max_dd * 200),
+                    'drawdown_component': min(25, max_dd * 150),
                     'prediction_component': min(25, pred_volatility * 150)
-                }
+                },
+                'calculation_method': 'deterministic'  # Add this flag
             }
             
         except Exception as e:
-            # Generate a meaningful fallback risk score
+            # Generate a deterministic fallback risk score
             try:
-                # Use stock price and prediction data to create semi-realistic score
                 current_price = float(stock_data.iloc[-1])
                 price_volatility = stock_data.pct_change().std() * np.sqrt(252)
                 
-                # Base risk calculation
+                # Base risk calculation (deterministic)
                 vol_risk = min(30, price_volatility * 100)
                 
-                # Prediction risk
+                # Prediction risk (deterministic)
                 if len(predictions) > 1:
                     pred_change = abs((predictions[-1] - current_price) / current_price * 100)
                     pred_risk = min(25, pred_change)
                 else:
                     pred_risk = 15
                 
-                # Data quality risk
+                # Data quality risk (deterministic)
                 data_risk = 20 if len(stock_data) < 100 else 10
                 
                 calculated_risk = int(vol_risk + pred_risk + data_risk)
                 calculated_risk = max(20, min(85, calculated_risk))
                 
             except:
-                # Final fallback - use a pseudo-random but consistent score
-                calculated_risk = 35 + (hash(str(datetime.now().date())) % 30)
+                # Final deterministic fallback
+                price_hash = int(hashlib.md5(str(current_price).encode()).hexdigest()[:4], 16)
+                calculated_risk = 35 + (price_hash % 30)
             
             return {
                 'var_metrics': {'var_1d': 0.025, 'var_5d': 0.056, 'var_10d': 0.079, 'method': 'fallback'},
@@ -456,11 +471,12 @@ class RiskAnalyzer:
                 'stress_scenarios': {'error': 'calculation_failed'},
                 'prediction_volatility': 0.05,
                 'risk_score': calculated_risk,
+                'calculation_method': 'deterministic_fallback',
                 'error': str(e)
             }
 
 def create_risk_dashboard(risk_metrics):
-    """Create a visual risk dashboard"""
+    """Create a visual risk dashboard - NO CHANGES NEEDED (visualization only)"""
     try:
         risk_score = risk_metrics.get('risk_score', 50)
         
@@ -501,10 +517,10 @@ def create_risk_dashboard(risk_metrics):
         return None
 
 def create_stress_test_chart(stress_scenarios, current_price):
-    """Create stress test visualization with proper error handling"""
+    """Create stress test visualization - DETERMINISTIC (no random components)"""
     try:
         if not stress_scenarios or 'error' in stress_scenarios:
-            # Create a simple fallback chart
+            # Create a deterministic fallback chart
             scenarios = ['Bull Market', 'Base Case', 'Bear Market', 'Correction', 'Crash']
             returns = [15.0, 5.0, -8.0, -20.0, -35.0]
             
@@ -531,7 +547,7 @@ def create_stress_test_chart(stress_scenarios, current_price):
             ])
             
             fig.update_layout(
-                title="🔥 Stress Test Scenarios (Simulated)",
+                title="🔥 Stress Test Scenarios (Deterministic)",
                 xaxis_title="Scenario",
                 yaxis_title="Total Return (%)",
                 template='plotly_dark',
@@ -546,7 +562,7 @@ def create_stress_test_chart(stress_scenarios, current_price):
             
             return fig
         
-        # Extract data safely from stress scenarios
+        # Extract data from stress scenarios (deterministic)
         scenario_data = []
         for name, data in stress_scenarios.items():
             if isinstance(data, dict) and 'total_return' in data:
@@ -557,7 +573,7 @@ def create_stress_test_chart(stress_scenarios, current_price):
                 })
         
         if not scenario_data:
-            # If no valid scenario data, create mock data
+            # If no valid scenario data, create deterministic mock data
             scenario_data = [
                 {'scenario': 'Bull Market', 'return': 12.5, 'final_price': current_price * 1.125},
                 {'scenario': 'Base Case', 'return': 3.2, 'final_price': current_price * 1.032},
@@ -566,13 +582,13 @@ def create_stress_test_chart(stress_scenarios, current_price):
                 {'scenario': 'Crash', 'return': -32.1, 'final_price': current_price * 0.679}
             ]
         
-        # Sort by return for better visualization
+        # Sort by return for better visualization (deterministic)
         scenario_data.sort(key=lambda x: x['return'], reverse=True)
         
         scenarios = [item['scenario'] for item in scenario_data]
         returns = [item['return'] for item in scenario_data]
         
-        # Color coding based on return values
+        # Color coding based on return values (deterministic)
         colors = []
         for ret in returns:
             if ret > 8:
@@ -617,18 +633,18 @@ def create_stress_test_chart(stress_scenarios, current_price):
             paper_bgcolor='rgba(0,0,0,0)'
         )
         
-        # Add annotations for extreme values
+        # Add annotations for extreme values (deterministic thresholds)
         for i, (scenario, ret) in enumerate(zip(scenarios, returns)):
             if abs(ret) > 15:
                 fig.add_annotation(
                     x=scenario,
                     y=ret,
-                    text=f"High Risk",
+                    text=f"High {'Opportunity' if ret > 0 else 'Risk'}",
                     showarrow=True,
                     arrowhead=2,
                     arrowsize=1,
                     arrowwidth=2,
-                    arrowcolor="red" if ret < 0 else "green",
+                    arrowcolor="green" if ret > 0 else "red",
                     font=dict(size=10, color="white"),
                     bgcolor="rgba(0,0,0,0.7)",
                     bordercolor="white",
