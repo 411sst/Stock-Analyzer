@@ -163,8 +163,8 @@ st.markdown("""
         font-size: 13px;
         font-weight: 500;
         line-height: 1.4;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        text-transform: none;
         color: var(--color-text-secondary);
     }
 
@@ -264,10 +264,16 @@ st.markdown("""
         line-height: 1.5;
         background-color: var(--color-bg-secondary);
         border: 1px solid var(--color-border-subtle);
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 10px 14px;
         color: var(--color-text-primary);
         transition: all 0.2s ease;
+    }
+
+    /* Placeholder color */
+    .stTextInput input::placeholder, .stTextArea textarea::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.7;
     }
 
     .stTextInput input:hover, .stSelectbox select:hover, .stTextArea textarea:hover {
@@ -340,10 +346,23 @@ st.markdown("""
         height: 2px;
         background-color: var(--color-interactive-default);
     }
+    .stTabs [data-baseweb="tab-highlight"] {
+        height: 2px;
+        background-color: var(--color-info) !important;
+    }
 
     /* Sidebar Refinements */
     .css-1d391kg, .css-1lcbmhc {
         border-radius: 8px;
+    }
+
+    /* Sidebar header spacing: tighten below main title */
+    section[data-testid="stSidebar"] h1 {
+        margin-bottom: 8px !important;
+    }
+    section[data-testid="stSidebar"] .stMarkdown p {
+        margin-top: 0;
+        margin-bottom: 8px;
     }
 
     /* Radio Buttons */
@@ -489,7 +508,6 @@ def create_password_strength_indicator(password):
 # Sidebar Content
 with st.sidebar:
     st.title("Indian Stock Dashboard")
-    st.markdown("*Enhanced with AI & Authentication*")
 
     # Authentication Section
     if ENHANCED_FEATURES:
@@ -509,7 +527,7 @@ with st.sidebar:
                     with col1:
                         remember_me = st.checkbox("Remember me", value=True)
                     with col2:
-                        st.markdown('<small><a href="#" style="color: #60a5fa;">Forgot?</a></small>', unsafe_allow_html=True)
+                        st.markdown('<small><a href="#" style="color: var(--color-info); text-transform: none;">Forgot?</a></small>', unsafe_allow_html=True)
 
                     login_submit = st.form_submit_button("Login", use_container_width=True)
 
