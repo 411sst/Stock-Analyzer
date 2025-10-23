@@ -420,10 +420,13 @@ st.markdown("""
     }
     .auth-container {
         background-color: var(--color-bg-secondary);
-        padding: 24px;
+        padding: 12px 16px 16px 16px; /* reduce top padding to tighten whitespace */
         border-radius: 8px;
-        margin-bottom: 24px;
+        margin: 8px 0 24px 0; /* add small top margin, keep bottom spacing */
         border: 1px solid var(--color-border-subtle);
+    }
+    .auth-container h3, .auth-container .stMarkdown h3 {
+        margin-top: 0; /* remove extra gap at top inside the card */
     }
     .success-message {
         font-family: var(--font-ui);
