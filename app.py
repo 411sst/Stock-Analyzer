@@ -1143,7 +1143,6 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                     )
                                 ),
                                 showlegend=True,
-                                hovermode='x unified',
                                 hoverlabel=dict(
                                     bgcolor='#1A1A1A',
                                     bordercolor='#404040',
