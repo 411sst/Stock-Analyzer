@@ -38,33 +38,45 @@ st.markdown("""
     /* Font Imports */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* Color System */
+    /* Design System - CSS Variables */
     :root {
-        /* Backgrounds */
-        --bg-primary: #0F0F0F;
-        --bg-secondary: #1A1A1A;
-        --bg-tertiary: #242424;
+        /* Color System - Backgrounds */
+        --color-bg-primary: #0F0F0F;
+        --color-bg-secondary: #1A1A1A;
+        --color-bg-tertiary: #242424;
 
-        /* Borders */
-        --border-subtle: #2A2A2A;
-        --border-default: #404040;
-        --border-strong: #525252;
+        /* Color System - Borders */
+        --color-border-subtle: #2A2A2A;
+        --color-border-default: #404040;
+        --color-border-strong: #525252;
 
-        /* Text */
-        --text-primary: #FFFFFF;
-        --text-secondary: #A0A0A0;
-        --text-tertiary: #707070;
+        /* Color System - Text */
+        --color-text-primary: #FFFFFF;
+        --color-text-secondary: #A0A0A0;
+        --color-text-tertiary: #707070;
 
-        /* Semantic */
-        --positive: #10B981;
-        --negative: #EF4444;
-        --warning: #F59E0B;
-        --info: #3B82F6;
+        /* Color System - Semantic */
+        --color-positive: #10B981;
+        --color-negative: #EF4444;
+        --color-warning: #F59E0B;
+        --color-info: #3B82F6;
 
-        /* Interactive */
-        --interactive-default: #FFFFFF;
-        --interactive-hover: #E5E5E5;
-        --interactive-active: #D4D4D4;
+        /* Color System - Interactive */
+        --color-interactive-default: #FFFFFF;
+        --color-interactive-hover: #E5E5E5;
+        --color-interactive-active: #D4D4D4;
+
+        /* Spacing Scale */
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 24px;
+        --space-xl: 32px;
+        --space-xxl: 48px;
+
+        /* Border Radius */
+        --radius-sm: 6px;
+        --radius-md: 8px;
 
         /* Typography Scale */
         --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -101,7 +113,7 @@ st.markdown("""
         font-size: 15px;
         font-weight: 400;
         line-height: 1.6;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
@@ -113,8 +125,8 @@ st.markdown("""
         font-weight: 700;
         line-height: 1.2;
         letter-spacing: -0.02em;
-        color: var(--text-primary);
-        margin-bottom: 16px;
+        color: var(--color-text-primary);
+        margin-bottom: var(--space-md);
     }
 
     h2, .stHeader {
@@ -123,7 +135,7 @@ st.markdown("""
         font-weight: 600;
         line-height: 1.3;
         letter-spacing: -0.01em;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
         margin-bottom: 12px;
     }
 
@@ -132,8 +144,8 @@ st.markdown("""
         font-size: 18px;
         font-weight: 600;
         line-height: 1.4;
-        color: var(--text-primary);
-        margin-bottom: 8px;
+        color: var(--color-text-primary);
+        margin-bottom: var(--space-sm);
     }
 
     /* Body Text */
@@ -142,7 +154,7 @@ st.markdown("""
         font-size: 15px;
         font-weight: 400;
         line-height: 1.6;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
     }
 
     /* Caption/Label Text */
@@ -153,7 +165,7 @@ st.markdown("""
         line-height: 1.4;
         letter-spacing: 0.3px;
         text-transform: uppercase;
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
     }
 
     /* Financial Data - Monospace Typography */
@@ -176,7 +188,7 @@ st.markdown("""
         font-weight: 500;
         letter-spacing: 0.3px;
         text-transform: uppercase;
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
         line-height: 1.4;
     }
 
@@ -185,7 +197,7 @@ st.markdown("""
         font-size: 28px;
         font-weight: 600;
         line-height: 1.2;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
         font-variant-numeric: tabular-nums;
     }
 
@@ -210,10 +222,10 @@ st.markdown("""
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: var(--text-secondary);
-        background-color: var(--bg-secondary);
+        color: var(--color-text-secondary);
+        background-color: var(--color-bg-secondary);
         padding: 12px 16px;
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--color-border-subtle);
         text-align: right;
     }
 
@@ -224,12 +236,12 @@ st.markdown("""
         text-align: right;
         font-variant-numeric: tabular-nums;
         padding: 10px 16px;
-        border-bottom: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--color-border-subtle);
         transition: background-color 0.15s ease;
     }
 
     .stDataFrame tbody tr:hover td, .stTable tbody tr:hover td {
-        background-color: var(--bg-tertiary);
+        background-color: var(--color-bg-tertiary);
     }
 
     .stDataFrame tbody tr:last-child td, .stTable tbody tr:last-child td {
@@ -250,20 +262,20 @@ st.markdown("""
         font-size: 15px;
         font-weight: 400;
         line-height: 1.5;
-        background-color: var(--bg-secondary);
-        border: 1px solid var(--border-subtle);
+        background-color: var(--color-bg-secondary);
+        border: 1px solid var(--color-border-subtle);
         border-radius: 6px;
         padding: 10px 14px;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
         transition: all 0.2s ease;
     }
 
     .stTextInput input:hover, .stSelectbox select:hover, .stTextArea textarea:hover {
-        border-color: var(--border-default);
+        border-color: var(--color-border-default);
     }
 
     .stTextInput input:focus, .stSelectbox select:focus, .stTextArea textarea:focus {
-        border-color: var(--interactive-default);
+        border-color: var(--color-interactive-default);
         outline: none;
         box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
     }
@@ -273,7 +285,7 @@ st.markdown("""
         font-size: 13px;
         font-weight: 500;
         letter-spacing: 0.3px;
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
         margin-bottom: 8px;
         display: block;
     }
@@ -289,7 +301,7 @@ st.markdown("""
         font-family: var(--font-ui);
         font-size: 14px;
         font-weight: 400;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
     }
 
     /* Select Dropdown */
@@ -298,8 +310,8 @@ st.markdown("""
     }
 
     .stSelectbox select option {
-        background-color: var(--bg-secondary);
-        color: var(--text-primary);
+        background-color: var(--color-bg-secondary);
+        color: var(--color-text-primary);
         padding: 8px;
     }
 
@@ -310,7 +322,7 @@ st.markdown("""
 
     .stExpander {
         border-radius: 8px;
-        border: 1px solid var(--border-subtle);
+        border: 1px solid var(--color-border-subtle);
     }
 
     .stTabs [data-baseweb="tab"] {
@@ -326,7 +338,7 @@ st.markdown("""
 
     .stTabs [data-baseweb="tab-border"] {
         height: 2px;
-        background-color: var(--interactive-default);
+        background-color: var(--color-interactive-default);
     }
 
     /* Sidebar Refinements */
@@ -339,35 +351,35 @@ st.markdown("""
         font-family: var(--font-ui);
         font-size: 14px;
         font-weight: 400;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
         padding: 8px 12px;
         border-radius: 6px;
         transition: background-color 0.2s ease;
     }
 
     .stRadio > label:hover {
-        background-color: var(--bg-tertiary);
+        background-color: var(--color-bg-tertiary);
     }
 
     .reportview-container {
-        background-color: var(--bg-primary);
-        color: var(--text-primary);
+        background-color: var(--color-bg-primary);
+        color: var(--color-text-primary);
     }
     .sidebar .sidebar-content {
-        background-color: var(--bg-secondary);
+        background-color: var(--color-bg-secondary);
     }
     .metric-container {
-        background-color: var(--bg-secondary);
+        background-color: var(--color-bg-secondary);
         border-radius: 8px;
         padding: 16px;
-        border: 1px solid var(--border-subtle);
+        border: 1px solid var(--color-border-subtle);
     }
     .stButton button {
         font-family: var(--font-ui);
         font-size: 15px;
         font-weight: 600;
         line-height: 1.5;
-        background-color: var(--interactive-default);
+        background-color: var(--color-interactive-default);
         color: #000000;
         border-radius: 6px;
         border: none;
@@ -375,24 +387,24 @@ st.markdown("""
         transition: all 0.2s ease;
     }
     .stButton button:hover {
-        background-color: var(--interactive-hover);
+        background-color: var(--color-interactive-hover);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .user-info {
         padding: 24px;
-        background-color: var(--bg-secondary);
-        border: 1px solid var(--border-subtle);
+        background-color: var(--color-bg-secondary);
+        border: 1px solid var(--color-border-subtle);
         border-radius: 8px;
         margin-bottom: 24px;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
     }
     .auth-container {
-        background-color: var(--bg-secondary);
+        background-color: var(--color-bg-secondary);
         padding: 24px;
         border-radius: 8px;
         margin-bottom: 24px;
-        border: 1px solid var(--border-subtle);
+        border: 1px solid var(--color-border-subtle);
     }
     .success-message {
         font-family: var(--font-ui);
@@ -401,7 +413,7 @@ st.markdown("""
         line-height: 1.5;
         padding: 12px 16px;
         background-color: transparent;
-        border-left: 3px solid var(--positive);
+        border-left: 3px solid var(--color-positive);
         border-radius: 0;
         color: #D1FAE5;
         margin: 10px 0;
@@ -413,25 +425,25 @@ st.markdown("""
         line-height: 1.5;
         padding: 12px 16px;
         background-color: transparent;
-        border-left: 3px solid var(--negative);
+        border-left: 3px solid var(--color-negative);
         border-radius: 0;
         color: #FECACA;
         margin: 10px 0;
     }
     .prediction-card {
-        background-color: var(--bg-secondary);
+        background-color: var(--color-bg-secondary);
         border-radius: 8px;
         padding: 24px;
         margin: 24px 0;
-        border: 1px solid var(--border-subtle);
+        border: 1px solid var(--color-border-subtle);
     }
     .ml-metric {
         text-align: center;
         padding: 16px;
-        background-color: var(--bg-secondary);
+        background-color: var(--color-bg-secondary);
         border-radius: 8px;
         margin: 8px;
-        border: 1px solid var(--border-subtle);
+        border: 1px solid var(--color-border-subtle);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -467,10 +479,10 @@ def create_password_strength_indicator(password):
     return f"""
     <div style="margin: 16px 0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-secondary);">Password Strength:</span>
+            <span style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--color-text-secondary);">Password Strength:</span>
             <span style="font-family: 'Inter', sans-serif; color: {color}; font-weight: 600; font-size: 13px;">{strength_text}</span>
         </div>
-        <div style="background-color: var(--border-subtle); border-radius: 2px; height: 3px; overflow: hidden;">
+        <div style="background-color: var(--color-border-subtle); border-radius: 2px; height: 3px; overflow: hidden;">
             <div style="background-color: {color}; width: {score}%; height: 100%; border-radius: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
         </div>
     </div>
@@ -1245,8 +1257,8 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
 
                                     st.markdown(f"""
                                     <div style="
-                                        background-color: var(--bg-secondary);
-                                        border: 1px solid var(--border-subtle);
+                                        background-color: var(--color-bg-secondary);
+                                        border: 1px solid var(--color-border-subtle);
                                         border-radius: 8px;
                                         padding: 24px;
                                         height: 300px;
@@ -1269,18 +1281,18 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                                 color: {risk_color};
                                                 line-height: 1.2;
                                                 margin-bottom: 4px;
-                                            ">{risk_score}<span style="font-size: 24px; color: var(--text-secondary);">/100</span></div>
+                                            ">{risk_score}<span style="font-size: 24px; color: var(--color-text-secondary);">/100</span></div>
                                             <div style="
                                                 font-family: 'Inter', sans-serif;
                                                 font-size: 14px;
                                                 font-weight: 500;
-                                                color: var(--text-secondary);
+                                                color: var(--color-text-secondary);
                                             ">{risk_level}</div>
                                         </div>
 
                                         <div style="margin-top: 16px;">
                                             <div style="
-                                                background-color: var(--border-subtle);
+                                                background-color: var(--color-border-subtle);
                                                 height: 8px;
                                                 border-radius: 4px;
                                                 overflow: hidden;
@@ -1300,7 +1312,7 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                                 margin-top: 8px;
                                                 font-family: 'Inter', sans-serif;
                                                 font-size: 11px;
-                                                color: var(--text-tertiary);
+                                                color: var(--color-text-tertiary);
                                             ">
                                                 <span>Low</span>
                                                 <span>Moderate</span>
