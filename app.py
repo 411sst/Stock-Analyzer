@@ -32,9 +32,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for enhanced UI with systematic color palette
+# Custom CSS for enhanced UI with systematic color palette and typography
 st.markdown("""
 <style>
+    /* Font Imports */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
     /* Color System */
     :root {
         /* Backgrounds */
@@ -62,6 +65,174 @@ st.markdown("""
         --interactive-default: #FFFFFF;
         --interactive-hover: #E5E5E5;
         --interactive-active: #D4D4D4;
+
+        /* Typography Scale */
+        --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+    }
+
+    /*
+    TYPOGRAPHY SYSTEM DOCUMENTATION
+
+    UI Text (Inter):
+    - Weight 400 (Regular): Body text, descriptions
+    - Weight 500 (Medium): Labels, form fields, secondary headings
+    - Weight 600 (Semibold): Buttons, primary headings, emphasis
+    - Weight 700 (Bold): H1, major page titles
+    - Fallback: -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif
+
+    Financial Data (JetBrains Mono):
+    - Weight 400 (Regular): Standard numerical display
+    - Weight 500 (Medium): Emphasized numbers, metric values
+    - Weight 600 (Semibold): Large financial figures, primary metrics
+    - Fallback: SF Mono, Monaco, Cascadia Code, Roboto Mono, Consolas, monospace
+    - Feature: font-variant-numeric: tabular-nums (ensures digit alignment)
+
+    Line Height Ratios:
+    - Headings (h1-h3): 1.2-1.4 (tighter for visual impact)
+    - Body text: 1.5-1.6 (optimal readability)
+    - Captions/labels: 1.4 (balanced for small text)
+    - Financial data: 1.4 (maintains alignment in tables)
+    */
+
+    /* Base Typography */
+    body, .stApp {
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Heading Hierarchy */
+    h1, .stTitle {
+        font-family: var(--font-ui);
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+    }
+
+    h2, .stHeader {
+        font-family: var(--font-ui);
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+    }
+
+    h3, .stSubheader {
+        font-family: var(--font-ui);
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    /* Body Text */
+    p, .stMarkdown, .stText {
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--text-primary);
+    }
+
+    /* Caption/Label Text */
+    label, .stCaption, small, caption {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+    }
+
+    /* Financial Data - Monospace Typography */
+    .metric-value, .price, .percentage, .quantity, .financial-data,
+    .stMetric, .stMetricValue, [data-testid="stMetricValue"],
+    .stDataFrame td, .stTable td {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+    }
+
+    /* Metric Cards - Enhanced Typography */
+    .stMetric {
+        font-family: var(--font-ui);
+    }
+
+    .stMetric label, [data-testid="stMetricLabel"] {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    .stMetric [data-testid="stMetricValue"] {
+        font-family: var(--font-mono);
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.2;
+        color: var(--text-primary);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .stMetric [data-testid="stMetricDelta"] {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.4;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Table Typography - Right-align financial columns */
+    .stDataFrame, .stTable {
+        font-family: var(--font-ui);
+    }
+
+    .stDataFrame th, .stTable th {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+    }
+
+    .stDataFrame td, .stTable td {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 400;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Form Elements */
+    .stTextInput input, .stSelectbox select, .stTextArea textarea {
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.5;
+    }
+
+    .stTextInput label, .stSelectbox label, .stTextArea label {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: var(--text-secondary);
     }
 
     .reportview-container {
@@ -78,12 +249,15 @@ st.markdown("""
         border: 1px solid var(--border-subtle);
     }
     .stButton button {
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.5;
         background-color: var(--interactive-default);
         color: #000000;
         border-radius: 6px;
         border: none;
         padding: 10px 16px;
-        font-weight: 600;
         transition: all 0.2s ease;
     }
     .stButton button:hover {
@@ -107,24 +281,28 @@ st.markdown("""
         border: 1px solid var(--border-subtle);
     }
     .success-message {
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
         padding: 12px 16px;
         background-color: transparent;
         border-left: 3px solid var(--positive);
         border-radius: 0;
         color: #D1FAE5;
         margin: 10px 0;
-        font-size: 14px;
-        line-height: 1.5;
     }
     .error-message {
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
         padding: 12px 16px;
         background-color: transparent;
         border-left: 3px solid var(--negative);
         border-radius: 0;
         color: #FECACA;
         margin: 10px 0;
-        font-size: 14px;
-        line-height: 1.5;
     }
     .prediction-card {
         background-color: var(--bg-secondary);
@@ -173,13 +351,13 @@ def create_password_strength_indicator(password):
     strength_text, color = get_password_strength_text(score)
 
     return f"""
-    <div style="margin: 10px 0;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px;">Password Strength:</span>
-            <span style="color: {color}; font-weight: bold; font-size: 12px;">{strength_text}</span>
+    <div style="margin: 16px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-secondary);">Password Strength:</span>
+            <span style="font-family: 'Inter', sans-serif; color: {color}; font-weight: 600; font-size: 13px;">{strength_text}</span>
         </div>
-        <div style="background-color: #374151; border-radius: 10px; height: 8px; margin: 5px 0;">
-            <div style="background-color: {color}; width: {score}%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div>
+        <div style="background-color: var(--border-subtle); border-radius: 2px; height: 3px; overflow: hidden;">
+            <div style="background-color: {color}; width: {score}%; height: 100%; border-radius: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
         </div>
     </div>
     """
@@ -779,14 +957,24 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                 except Exception as ref_error:
                                     st.info(f"Reference line skipped: {str(ref_error)}")
 
-                            # Update chart layout
+                            # Update chart layout with typography
                             fig.update_layout(
                                 title={
                                     'text': f"{INDIAN_STOCKS.get(selected_stock, selected_stock)} - AI Price Prediction Analysis",
                                     'x': 0.5,
                                     'xanchor': 'center',
-                                    'font': {'size': 20, 'color': 'white'}
+                                    'font': {
+                                        'family': 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                        'size': 20,
+                                        'weight': 600,
+                                        'color': '#FFFFFF'
+                                    }
                                 },
+                                font=dict(
+                                    family='Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                    size=13,
+                                    color='#A0A0A0'
+                                ),
                                 xaxis_title="Date",
                                 yaxis_title="Price (₹)",
                                 template='plotly_dark',
@@ -797,10 +985,37 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                     yanchor="bottom",
                                     y=1.02,
                                     xanchor="right",
-                                    x=1
+                                    x=1,
+                                    font=dict(
+                                        family='Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                        size=13
+                                    )
                                 ),
                                 plot_bgcolor='rgba(0,0,0,0)',
                                 paper_bgcolor='rgba(0,0,0,0)',
+                                xaxis=dict(
+                                    gridcolor='#1A1A1A',
+                                    gridwidth=1,
+                                    showline=False,
+                                    zeroline=False,
+                                    tickfont=dict(
+                                        family='Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                        size=12,
+                                        color='#A0A0A0'
+                                    )
+                                ),
+                                yaxis=dict(
+                                    gridcolor='#1A1A1A',
+                                    gridwidth=1,
+                                    showline=False,
+                                    zeroline=False,
+                                    tickformat=',.0f',
+                                    tickfont=dict(
+                                        family='JetBrains Mono, monospace',
+                                        size=12,
+                                        color='#A0A0A0'
+                                    )
+                                ),
                                 showlegend=True
                             )
                             
@@ -897,33 +1112,52 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                         mode="gauge+number",
                                         value=risk_score,
                                         domain={'x': [0, 1], 'y': [0, 1]},
-                                        title={'text': "Risk Score", 'font': {'size': 20, 'color': 'white'}},
-                                        number={'font': {'size': 40, 'color': 'white'}},
+                                        title={
+                                            'text': "Risk Score",
+                                            'font': {
+                                                'family': 'Inter, sans-serif',
+                                                'size': 18,
+                                                'weight': 600,
+                                                'color': '#FFFFFF'
+                                            }
+                                        },
+                                        number={
+                                            'font': {
+                                                'family': 'JetBrains Mono, monospace',
+                                                'size': 40,
+                                                'color': '#FFFFFF'
+                                            }
+                                        },
                                         gauge={
                                             'axis': {
-                                                'range': [None, 100], 
-                                                'tickwidth': 2, 
-                                                'tickcolor': "white",
-                                                'tickfont': {'color': 'white'}
+                                                'range': [None, 100],
+                                                'tickwidth': 2,
+                                                'tickcolor': "#A0A0A0",
+                                                'tickfont': {
+                                                    'family': 'JetBrains Mono, monospace',
+                                                    'size': 12,
+                                                    'color': '#A0A0A0'
+                                                }
                                             },
-                                            'bar': {'color': "darkred" if risk_score > 70 else "orange" if risk_score > 50 else "green"},
+                                            'bar': {'color': "#EF4444" if risk_score > 70 else "#F59E0B" if risk_score > 50 else "#10B981"},
                                             'steps': [
-                                                {'range': [0, 30], 'color': "rgba(0, 255, 0, 0.3)"},
-                                                {'range': [30, 60], 'color': "rgba(255, 255, 0, 0.3)"},
-                                                {'range': [60, 80], 'color': "rgba(255, 165, 0, 0.3)"},
-                                                {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.3)"}
+                                                {'range': [0, 30], 'color': "rgba(16, 185, 129, 0.2)"},
+                                                {'range': [30, 60], 'color': "rgba(245, 158, 11, 0.2)"},
+                                                {'range': [60, 80], 'color': "rgba(239, 68, 68, 0.2)"},
+                                                {'range': [80, 100], 'color': "rgba(239, 68, 68, 0.3)"}
                                             ],
                                             'threshold': {
-                                                'line': {'color': "red", 'width': 4},
+                                                'line': {'color': "#EF4444", 'width': 3},
                                                 'thickness': 0.75,
                                                 'value': 85
                                             }
                                         }
                                     ))
-                                    
+
                                     gauge_fig.update_layout(
                                         height=300,
                                         template='plotly_dark',
+                                        font=dict(family='Inter, sans-serif', size=13, color='#A0A0A0'),
                                         paper_bgcolor='rgba(0,0,0,0)',
                                         plot_bgcolor='rgba(0,0,0,0)'
                                     )
@@ -978,16 +1212,33 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                             ])
                                             
                                             stress_fig.update_layout(
-                                                title="Stress Test Scenarios",
+                                                title={
+                                                    'text': "Stress Test Scenarios",
+                                                    'font': {
+                                                        'family': 'Inter, sans-serif',
+                                                        'size': 16,
+                                                        'weight': 600,
+                                                        'color': '#FFFFFF'
+                                                    }
+                                                },
+                                                font=dict(
+                                                    family='Inter, sans-serif',
+                                                    size=12,
+                                                    color='#A0A0A0'
+                                                ),
                                                 xaxis_title="Market Scenario",
                                                 yaxis_title="Return (%)",
                                                 template='plotly_dark',
                                                 height=300,
                                                 showlegend=False,
+                                                xaxis=dict(
+                                                    tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                                ),
                                                 yaxis=dict(
                                                     zeroline=True,
                                                     zerolinewidth=2,
-                                                    zerolinecolor='rgba(128,128,128,0.5)'
+                                                    zerolinecolor='rgba(128,128,128,0.5)',
+                                                    tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
                                                 )
                                             )
                                             
@@ -1011,11 +1262,17 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                         ])
                                         
                                         stress_fig.update_layout(
-                                            title="Stress Test Scenarios",
+                                            title={
+                                                'text': "Stress Test Scenarios",
+                                                'font': {'family': 'Inter, sans-serif', 'size': 16, 'weight': 600, 'color': '#FFFFFF'}
+                                            },
+                                            font=dict(family='Inter, sans-serif', size=12, color='#A0A0A0'),
                                             xaxis_title="Scenario",
                                             yaxis_title="Return (%)",
                                             template='plotly_dark',
-                                            height=300
+                                            height=300,
+                                            xaxis=dict(tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')),
+                                            yaxis=dict(tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0'))
                                         )
                                         
                                         st.plotly_chart(stress_fig, use_container_width=True)
@@ -1064,12 +1321,25 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                         ))
                                     
                                     model_fig.update_layout(
-                                        title="Individual Model Predictions vs Ensemble",
+                                        title={
+                                            'text': "Individual Model Predictions vs Ensemble",
+                                            'font': {'family': 'Inter, sans-serif', 'size': 18, 'weight': 600, 'color': '#FFFFFF'}
+                                        },
+                                        font=dict(family='Inter, sans-serif', size=13, color='#A0A0A0'),
                                         xaxis_title="Date",
                                         yaxis_title="Price (₹)",
                                         template='plotly_dark',
                                         height=400,
-                                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                                        legend=dict(
+                                            orientation="h",
+                                            yanchor="bottom",
+                                            y=1.02,
+                                            xanchor="right",
+                                            x=1,
+                                            font=dict(family='Inter, sans-serif', size=12)
+                                        ),
+                                        xaxis=dict(tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')),
+                                        yaxis=dict(tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0'))
                                     )
 
                                     st.plotly_chart(model_fig, use_container_width=True)
@@ -1087,11 +1357,17 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                         ])
 
                                         conf_fig.update_layout(
-                                            title="Individual Model Confidence Levels",
+                                            title={
+                                                'text': "Individual Model Confidence Levels",
+                                                'font': {'family': 'Inter, sans-serif', 'size': 16, 'weight': 600, 'color': '#FFFFFF'}
+                                            },
+                                            font=dict(family='Inter, sans-serif', size=12, color='#A0A0A0'),
                                             xaxis_title="Model",
                                             yaxis_title="Confidence (%)",
                                             template='plotly_dark',
-                                            height=300
+                                            height=300,
+                                            xaxis=dict(tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')),
+                                            yaxis=dict(tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0'))
                                         )
                                         
                                         st.plotly_chart(conf_fig, use_container_width=True)
