@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import time
 import random
 from .indian_stocks import INDIAN_STOCKS, INDICES
+from .sentiment_analysis import analyze_sentiment as _rich_analyze_sentiment
 # Load environment variables
 load_dotenv()
 
@@ -264,12 +265,27 @@ def analyze_technical_indicators(df):
         "trend": "uptrend" if latest['Close'] > latest['SMA20'] else "downtrend"
     }
 
+def _normalize_sentiment(sent):
+    """Map rich sentiments (strong_positive/negative) to basic positive/negative/neutral."""
+    s = (sent or "").lower()
+    if s.startswith("strong_positive") or s == "positive":
+        return "positive"
+    if s.startswith("strong_negative") or s == "negative":
+        return "negative"
+    return "neutral"
+
+
 @st.cache_data(ttl=300)
 def fetch_news_sources():
     """Fetch news from multiple Indian financial sources"""
     try:
         # NewsAPI integration
         newsapi_key = os.getenv("NEWS_API_KEY")
+        if not newsapi_key:
+            try:
+                newsapi_key = st.secrets.get("newsapi", {}).get("api_key")
+            except Exception:
+                newsapi_key = None
         news_items = []
         
         if newsapi_key:
@@ -279,50 +295,50 @@ def fetch_news_sources():
             if response.status_code == 200:
                 articles = response.json().get("articles", [])
                 for article in articles:
-                    sentiment = analyze_sentiment(article["title"])
+                    sentiment = _rich_analyze_sentiment(article["title"]) or {"sentiment": "neutral", "score": 0}
                     news_items.append({
                         "title": article["title"],
                         "source": "Economic Times",
-                        "sentiment": sentiment["sentiment"],
+                        "sentiment": _normalize_sentiment(sentiment["sentiment"]),
                         "score": sentiment["score"],
                         "url": article.get("url", "https://economictimes.indiatimes.com/markets/stocks/news")
                     })
                     
             # Business Standard
-            bs_url = f" https://newsapi.org/v2/top-headlines?sources=business-standard&apiKey={newsapi_key}"
+            bs_url = f"https://newsapi.org/v2/top-headlines?sources=business-standard&apiKey={newsapi_key}"
             response = requests.get(bs_url)
             if response.status_code == 200:
                 articles = response.json().get("articles", [])
                 for article in articles:
-                    sentiment = analyze_sentiment(article["title"])
+                    sentiment = _rich_analyze_sentiment(article["title"]) or {"sentiment": "neutral", "score": 0}
                     news_items.append({
                         "title": article["title"],
                         "source": "Business Standard",
-                        "sentiment": sentiment["sentiment"],
+                        "sentiment": _normalize_sentiment(sentiment["sentiment"]),
                         "score": sentiment["score"],
                         "url": article.get("url", "https://www.business-standard.com/markets/news")
                     })
         
         # Moneycontrol RSS Feed
-        mc_feed = feedparser.parse(" https://www.moneycontrol.com/rss/buzzingstocks.xml ")
+        mc_feed = feedparser.parse("https://www.moneycontrol.com/rss/buzzingstocks.xml")
         for entry in mc_feed.entries[:5]:
-            sentiment = analyze_sentiment(entry.title)
+            sentiment = _rich_analyze_sentiment(entry.title) or {"sentiment": "neutral", "score": 0}
             news_items.append({
                 "title": entry.title,
                 "source": "Moneycontrol",
-                "sentiment": sentiment["sentiment"],
+                "sentiment": _normalize_sentiment(sentiment["sentiment"]),
                 "score": sentiment["score"],
                 "url": entry.get("link", "https://www.moneycontrol.com/news/business/markets/")
             })
             
         # Livemint RSS Feed
-        lm_feed = feedparser.parse("https://www.livemint.com/market/rssfeedlatest.cms ")
+        lm_feed = feedparser.parse("https://www.livemint.com/market/rssfeedlatest.cms")
         for entry in lm_feed.entries[:5]:
-            sentiment = analyze_sentiment(entry.title)
+            sentiment = _rich_analyze_sentiment(entry.title) or {"sentiment": "neutral", "score": 0}
             news_items.append({
                 "title": entry.title,
                 "source": "Live Mint",
-                "sentiment": sentiment["sentiment"],
+                "sentiment": _normalize_sentiment(sentiment["sentiment"]),
                 "score": sentiment["score"],
                 "url": entry.get("link", "https://www.livemint.com/market")
             })
@@ -377,17 +393,7 @@ def fetch_news_sources():
             }
         ]
 
-def analyze_sentiment(text):
-    """Analyze sentiment of text using TextBlob"""
-    analysis = TextBlob(text)
-    polarity = analysis.sentiment.polarity
-    
-    if polarity > 0.3:
-        return {"sentiment": "positive", "score": polarity}
-    elif polarity < -0.3:
-        return {"sentiment": "negative", "score": polarity}
-    else:
-        return {"sentiment": "neutral", "score": polarity}
+# Removed local analyze_sentiment in favor of utils.sentiment_analysis.analyze_sentiment
 
 @st.cache_data(ttl=300)
 def fetch_support_resistance_levels(df):
@@ -433,33 +439,75 @@ def is_resistance(i, highs):
     return highs[i] > highs[i-1] and highs[i] > highs[i-2] and highs[i] > highs[i+1] and highs[i] > highs[i+2]
 
 def calculate_portfolio_value(portfolio):
-    """Calculate total portfolio value and returns"""
-    total_value = 0
-    total_investment = 0
-    
+    """Calculate total portfolio value and returns using batched price fetches."""
+    total_value = 0.0
+    total_investment = 0.0
+
+    if not portfolio:
+        return {"total_value": 0.0, "p_and_l": 0.0, "return_percentage": 0.0}
+
+    symbols = list({h['symbol'] for h in portfolio if 'symbol' in h})
+    price_map = {}
+
+    try:
+        # Batch fetch latest close for all symbols
+        data = yf.download(symbols, period="1d", progress=False, group_by='ticker', threads=True)
+
+        if isinstance(data.columns, pd.MultiIndex):
+            # Multi-ticker format: ('Close', 'SYMBOL') or ('SYMBOL','Close') depending on version
+            # Normalize to map symbol -> price
+            # Try both orientations
+            if 'Close' in data.columns.get_level_values(0):
+                close_df = data['Close']  # columns are symbols
+                for sym in close_df.columns:
+                    try:
+                        price_map[sym] = float(close_df[sym].dropna().iloc[-1])
+                    except Exception:
+                        pass
+            else:
+                # Columns like (symbol, field)
+                for sym in symbols:
+                    try:
+                        close_series = data[(sym, 'Close')]
+                        price_map[sym] = float(close_series.dropna().iloc[-1])
+                    except Exception:
+                        pass
+        else:
+            # Single ticker scenario
+            try:
+                last_close = float(data['Close'].dropna().iloc[-1])
+                if len(symbols) == 1:
+                    price_map[symbols[0]] = last_close
+            except Exception:
+                pass
+    except Exception:
+        # Fall back to per-symbol fetch as last resort
+        for sym in symbols:
+            try:
+                stock = yf.Ticker(sym)
+                price_map[sym] = float(stock.history(period="1d")["Close"].dropna().iloc[-1])
+            except Exception:
+                pass
+
     for holding in portfolio:
-        try:
-            stock = yf.Ticker(holding['symbol'])
-            current_price = stock.history(period="1d")['Close'][-1]
-        except:
-            current_price = holding['buy_price']  # Use buy price if unable to fetch
-            
-        quantity = holding['quantity']
-        buy_price = holding['buy_price']
-        
+        sym = holding.get('symbol')
+        quantity = float(holding.get('quantity', 0))
+        buy_price = float(holding.get('buy_price', 0))
+
+        current_price = price_map.get(sym, buy_price)
         current_value = quantity * current_price
         investment_value = quantity * buy_price
-        
+
         total_value += current_value
         total_investment += investment_value
-    
+
     p_and_l = total_value - total_investment
-    return_percentage = (p_and_l / total_investment) * 100 if total_investment > 0 else 0
-    
+    return_percentage = (p_and_l / total_investment) * 100 if total_investment > 0 else 0.0
+
     return {
-        "total_value": total_value,
-        "p_and_l": p_and_l,
-        "return_percentage": return_percentage
+        "total_value": float(total_value),
+        "p_and_l": float(p_and_l),
+        "return_percentage": float(return_percentage)
     }
 
 def fetch_market_movers():

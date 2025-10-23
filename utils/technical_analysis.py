@@ -19,7 +19,9 @@ def create_candlestick_chart(df, title="Price Chart"):
         high=df['High'],
         low=df['Low'],
         close=df['Close'],
-        name='OHLC'
+        name='OHLC',
+        increasing_line_color='var(--color-positive)',
+        decreasing_line_color='var(--color-negative)'
     ), row=1, col=1)
 
     # Moving Averages
@@ -27,14 +29,14 @@ def create_candlestick_chart(df, title="Price Chart"):
         x=df.index,
         y=df['SMA20'],
         name='SMA 20',
-        line=dict(color='orange', width=1)
+        line=dict(color='var(--color-info)', width=1)
     ), row=1, col=1)
 
     fig.add_trace(go.Scatter(
         x=df.index,
         y=df['EMA50'],
         name='EMA 50',
-        line=dict(color='blue', width=1)
+        line=dict(color='var(--color-text-secondary)', width=1)
     ), row=1, col=1)
 
     # Bollinger Bands
@@ -42,14 +44,14 @@ def create_candlestick_chart(df, title="Price Chart"):
         x=df.index,
         y=df['BB_upper'],
         name='BB Upper',
-        line=dict(color='gray', width=1, dash='dot')
+        line=dict(color='var(--color-border-default)', width=1, dash='dot')
     ), row=1, col=1)
 
     fig.add_trace(go.Scatter(
         x=df.index,
         y=df['BB_lower'],
         name='BB Lower',
-        line=dict(color='gray', width=1, dash='dot'),
+        line=dict(color='var(--color-border-default)', width=1, dash='dot'),
         fill='tonexty'
     ), row=1, col=1)
 
@@ -58,15 +60,15 @@ def create_candlestick_chart(df, title="Price Chart"):
         x=df.index,
         y=df['RSI'],
         name='RSI',
-        line=dict(color='purple')
+        line=dict(color='var(--color-info)')
     ), row=2, col=1)
     
     # Add overbought/oversold lines
-    fig.add_hline(y=70, line_dash="dash", line_color="red", opacity=0.5, row=2, col=1)
-    fig.add_hline(y=30, line_dash="dash", line_color="green", opacity=0.5, row=2, col=1)
+    fig.add_hline(y=70, line_dash="dash", line_color="var(--color-negative)", opacity=0.5, row=2, col=1)
+    fig.add_hline(y=30, line_dash="dash", line_color="var(--color-positive)", opacity=0.5, row=2, col=1)
 
     # MACD
-    colors = ['green' if val >= 0 else 'red' for val in df['MACD'] - df['MACD_signal']]
+    colors = ['var(--color-positive)' if val >= 0 else 'var(--color-negative)' for val in df['MACD'] - df['MACD_signal']]
     
     fig.add_trace(go.Bar(
         x=df.index,
@@ -79,19 +81,19 @@ def create_candlestick_chart(df, title="Price Chart"):
         x=df.index,
         y=df['MACD'],
         name='MACD',
-        line=dict(color='blue')
+        line=dict(color='var(--color-text-primary)')
     ), row=3, col=1)
     
     fig.add_trace(go.Scatter(
         x=df.index,
         y=df['MACD_signal'],
         name='Signal',
-        line=dict(color='orange')
+        line=dict(color='var(--color-text-secondary)')
     ), row=3, col=1)
 
     # Volume
-    volume_colors = ['green' if row['Open'] - row['Close'] >= 0 
-                    else 'red' for _, row in df.iterrows()]
+    volume_colors = ['var(--color-negative)' if row['Open'] - row['Close'] >= 0 
+                    else 'var(--color-positive)' for _, row in df.iterrows()]
     
     fig.add_trace(go.Bar(
         x=df.index,
@@ -116,6 +118,14 @@ def create_candlestick_chart(df, title="Price Chart"):
             x=1
         )
     )
+    fig.update_layout(
+        plot_bgcolor='#0F0F0F',
+        paper_bgcolor='#0F0F0F',
+        font=dict(color='var(--color-text-primary)'),
+        xaxis=dict(gridcolor='#242424'),
+        yaxis=dict(gridcolor='#242424'),
+        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
+    )
 
     # Update y-axis labels
     fig.update_yaxes(title_text="Price", row=1, col=1)
@@ -133,18 +143,26 @@ def create_rsi_chart(df):
         x=df.index,
         y=df['RSI'],
         name='RSI',
-        line=dict(color='purple')
+        line=dict(color='var(--color-info)')
     ))
     
     # Add overbought/oversold lines
-    fig.add_hline(y=70, line_dash="dash", line_color="red", opacity=0.5)
-    fig.add_hline(y=30, line_dash="dash", line_color="green", opacity=0.5)
+    fig.add_hline(y=70, line_dash="dash", line_color="var(--color-negative)", opacity=0.5)
+    fig.add_hline(y=30, line_dash="dash", line_color="var(--color-positive)", opacity=0.5)
     
     fig.update_layout(
         title="Relative Strength Index (RSI)",
         yaxis_range=[0,100],
         template='plotly_dark',
         height=300
+    )
+    fig.update_layout(
+        plot_bgcolor='#0F0F0F',
+        paper_bgcolor='#0F0F0F',
+        font=dict(color='var(--color-text-primary)'),
+        xaxis=dict(gridcolor='#242424'),
+        yaxis=dict(gridcolor='#242424'),
+        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
     )
     
     return fig
@@ -158,7 +176,7 @@ def create_macd_chart(df):
         x=df.index,
         y=df['MACD'],
         name='MACD',
-        line=dict(color='blue')
+        line=dict(color='var(--color-text-primary)')
     ))
     
     # Signal Line
@@ -166,11 +184,11 @@ def create_macd_chart(df):
         x=df.index,
         y=df['MACD_signal'],
         name='Signal',
-        line=dict(color='orange')
+        line=dict(color='var(--color-text-secondary)')
     ))
     
     # Histogram
-    colors = ['green' if val >= 0 else 'red' for val in df['MACD'] - df['MACD_signal']]
+    colors = ['var(--color-positive)' if val >= 0 else 'var(--color-negative)' for val in df['MACD'] - df['MACD_signal']]
     fig.add_trace(go.Bar(
         x=df.index,
         y=(df['MACD'] - df['MACD_signal']),
@@ -183,6 +201,14 @@ def create_macd_chart(df):
         template='plotly_dark',
         height=300,
         showlegend=False
+    )
+    fig.update_layout(
+        plot_bgcolor='#0F0F0F',
+        paper_bgcolor='#0F0F0F',
+        font=dict(color='var(--color-text-primary)'),
+        xaxis=dict(gridcolor='#242424'),
+        yaxis=dict(gridcolor='#242424'),
+        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
     )
     
     return fig

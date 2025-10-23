@@ -6,7 +6,7 @@ from utils.data_fetcher import fetch_stock_data, fetch_support_resistance_levels
 from utils.technical_analysis import create_candlestick_chart, create_rsi_chart, create_macd_chart, generate_buy_sell_signals
 from utils.indian_stocks import INDIAN_STOCKS
 
-def stock_analysis_page(mode):
+def stock_analysis_page():
     st.header("Stock Analysis")
     
     # Stock Selector
@@ -99,21 +99,15 @@ def stock_analysis_page(mode):
             elif "MACD" in signal['reason']:
                 confidence = 70
             
-            if mode == "Beginner":
-                st.markdown(f"""
-                <div style='padding: 10px; border-left: 4px solid {'green' if signal['type'] == 'BUY' else 'red'}; margin: 10px 0;'>
-                    <strong>{signal['type']}</strong>: {signal['reason']}
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div style='padding: 10px; border-left: 4px solid {'green' if signal['type'] == 'BUY' else 'red'}; margin: 10px 0;'>
-                    <strong>{signal['type']} Signal (Confidence: {confidence}%)</strong><br>
-                    {signal['reason']}, RSI(14)={latest['RSI']:.2f} [{ 'Oversold' if latest['RSI'] < 30 else 'Overbought' if latest['RSI'] > 70 else 'Neutral' }], 
-                    MACD { 'bullish' if latest['MACD'] > latest['MACD_signal'] else 'bearish' } crossover, 
-                    Volume: {(latest['Volume']/latest['Vol_MA']*100):.0f}% of avg
-                </div>
-                """, unsafe_allow_html=True)
+            # Always show detailed signals by default (global modes removed)
+            st.markdown(f"""
+            <div style='padding: 10px; border-left: 4px solid {'green' if signal['type'] == 'BUY' else 'red'}; margin: 10px 0;'>
+                <strong>{signal['type']} Signal (Confidence: {confidence}%)</strong><br>
+                {signal['reason']}, RSI(14)={latest['RSI']:.2f} [{ 'Oversold' if latest['RSI'] < 30 else 'Overbought' if latest['RSI'] > 70 else 'Neutral' }], 
+                MACD { 'bullish' if latest['MACD'] > latest['MACD_signal'] else 'bearish' } crossover, 
+                Volume: {(latest['Volume']/latest['Vol_MA']*100):.0f}% of avg
+            </div>
+            """, unsafe_allow_html=True)
     else:
         st.info("No clear buy/sell signals detected based on current technical indicators.")
     

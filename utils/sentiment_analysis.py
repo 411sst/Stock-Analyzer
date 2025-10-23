@@ -38,11 +38,17 @@ def create_sentiment_trend_chart(news_data):
         labels={'score': 'Sentiment Score', 'date': 'Time'},
         template='plotly_dark'
     )
-    
-    # Add color based on sentiment
-    fig.update_traces(line=dict(color='green', width=2), selector=dict(name='positive'))
-    fig.update_traces(line=dict(color='red', width=2), selector=dict(name='negative'))
-    fig.update_traces(line=dict(color='gray', width=2), selector=dict(name='neutral'))
+
+    # Unified styling
+    fig.update_traces(line=dict(color='var(--color-info)', width=2))
+    fig.update_layout(
+        plot_bgcolor='#0F0F0F',
+        paper_bgcolor='#0F0F0F',
+        font=dict(color='var(--color-text-primary)'),
+        xaxis=dict(gridcolor='#242424'),
+        yaxis=dict(gridcolor='#242424'),
+        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
+    )
     
     return fig
 
@@ -114,26 +120,27 @@ def create_sector_sentiment_chart(news_data):
     sorted_sectors = sorted(avg_scores.keys(), key=lambda x: abs(avg_scores[x]), reverse=True)
     sorted_scores = [avg_scores[sector] for sector in sorted_sectors]
     
-    # Create color gradient based on strength
-    colors = [
-        f"rgb({255-int(255*(score+1)/2)}, {255*int(score>0)*(score+1)/2}, 0)"
-        if score != 0 else "rgb(128, 128, 128)"
-        for score in sorted_scores
+    # Discrete color by sign using semantic variables
+    bar_colors = [
+        ('var(--color-positive)' if s > 0.05 else 'var(--color-negative)' if s < -0.05 else 'var(--color-text-secondary)')
+        for s in sorted_scores
     ]
-    
+
     fig = px.bar(
         x=sorted_sectors,
         y=sorted_scores,
         title='Sector-wise Sentiment Analysis',
         labels={'x': 'Sector', 'y': 'Sentiment Score'},
-        color=sorted_scores,
-        color_continuous_scale=[
-            [0, 'red'],
-            [0.5, 'white'],
-            [1, 'green']
-        ],
-        range_color=(-1, 1),
         template='plotly_dark'
+    )
+    fig.update_traces(marker_color=bar_colors)
+    fig.update_layout(
+        plot_bgcolor='#0F0F0F',
+        paper_bgcolor='#0F0F0F',
+        font=dict(color='var(--color-text-primary)'),
+        xaxis=dict(gridcolor='#242424'),
+        yaxis=dict(gridcolor='#242424'),
+        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
     )
     
     # Add custom annotations for strong sentiments
@@ -144,8 +151,8 @@ def create_sector_sentiment_chart(news_data):
                 y=score,
                 text=f"{score:.2f}",
                 showarrow=False,
-                font=dict(size=12, color="white"),
-                bgcolor="rgba(0,0,0,0.5)",
+                font=dict(size=12, color='var(--color-text-primary)'),
+                bgcolor='rgba(0,0,0,0.5)',
                 borderpad=4
             )
     
@@ -217,14 +224,16 @@ def create_market_buzz_chart(news_data):
         x='Sector',
         y='Buzz Level',
         title='Market Buzz Index',
-        color='Buzz Level',
-        color_continuous_scale=[
-            [0, 'lightblue'],
-            [0.5, 'blue'],
-            [1, 'darkblue']
-        ],
-        range_color=(0, 100),
         template='plotly_dark'
+    )
+    fig.update_traces(marker_color='var(--color-info)')
+    fig.update_layout(
+        plot_bgcolor='#0F0F0F',
+        paper_bgcolor='#0F0F0F',
+        font=dict(color='var(--color-text-primary)'),
+        xaxis=dict(gridcolor='#242424'),
+        yaxis=dict(gridcolor='#242424'),
+        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
     )
     
     return fig

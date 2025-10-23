@@ -25,7 +25,7 @@
 - **Secure Registration/Login**: Password strength validation and encrypted storage
 - **Personal Portfolios**: Track your investments with real-time P&L calculations
 - **Watchlists**: Monitor favorite stocks with price alerts
-- **User Preferences**: Customizable themes and trading modes (Beginner/Pro/Expert)
+- **User Preferences**: Customizable themes and display options
 
 ### 📊 **Market Analysis Tools**
 - **Real-time Market Data**: Live NSE/BSE data via Yahoo Finance API
@@ -83,8 +83,8 @@ Visit **[your-app-name.streamlit.app](https://411-stock-analyzer.streamlit.app)*
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/indian-stock-dashboard.git
-   cd indian-stock-dashboard
+   git clone https://github.com/411sst/Stock-Analyzer.git
+   cd Stock-Analyzer
    ```
 
 2. **Create virtual environment**
@@ -171,11 +171,8 @@ indian-stock-dashboard/
 ### **Getting Started**
 
 1. **Create Account**: Register with username, email, and secure password
-2. **Choose Trading Mode**: 
-   - **Beginner**: Simple analysis with explanations
-   - **Pro**: Advanced technical indicators
-   - **Expert**: Full ML predictions & risk analysis
-3. **Select Navigation**: Choose from Market Overview, Stock Analysis, Portfolio Tracker, News & Sentiment, ML Predictions
+2. **Select Navigation**: Choose from Market Overview, Stock Analysis, Portfolio Tracker, News & Sentiment, ML Predictions
+3. Optional: Use page-specific controls (e.g., Analysis Level on the ML Predictions page)
 
 ### **Using AI Predictions**
 

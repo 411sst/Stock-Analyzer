@@ -39,15 +39,32 @@ class AuthHandler:
             return False
 
     def _get_connection(self):
-        """Establish a connection to the PostgreSQL database with error handling."""
+        """Establish a connection to the PostgreSQL database with error handling.
+        Accepts both clean URLs and mistakenly pasted shell commands like:
+        "psql 'postgresql://user:pass@host/db?sslmode=require'"
+        """
         try:
-            # Parse the URL to handle different formats
-            if self.db_url.startswith('postgresql://'):
-                # Convert postgresql:// to postgres:// if needed (some services use this)
-                url = self.db_url.replace('postgresql://', 'postgres://')
+            raw = (self.db_url or "").strip()
+
+            # If the string starts with a shell invocation (e.g., "psql '...'") extract the URL
+            if raw.lower().startswith("psql "):
+                # Remove leading command and surrounding quotes if present
+                # Example formats to support:
+                # psql 'postgresql://...'
+                # psql "postgresql://..."
+                parts = raw.split(None, 1)
+                raw = parts[1] if len(parts) > 1 else ""
+                raw = raw.strip().strip("'\"")
+
+            # Normalize scheme if needed
+            if raw.startswith('postgresql://'):
+                url = raw.replace('postgresql://', 'postgres://', 1)
             else:
-                url = self.db_url
-            
+                url = raw
+
+            # Final sanity strip of quotes/spaces
+            url = url.strip().strip("'\"")
+
             conn = psycopg2.connect(
                 url,
                 sslmode='require',  # Required for most cloud PostgreSQL services
@@ -111,11 +128,13 @@ class AuthHandler:
                 CREATE TABLE IF NOT EXISTS user_preferences (
                     user_id INTEGER PRIMARY KEY,
                     theme TEXT DEFAULT 'dark',
-                    default_mode TEXT DEFAULT 'Beginner',
                     email_notifications BOOLEAN DEFAULT TRUE,
                     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
                 )
             """)
+
+            # Run non-destructive schema migrations (idempotent)
+            self._run_schema_migrations(cursor)
 
             conn.commit()
             cursor.close()
@@ -124,6 +143,29 @@ class AuthHandler:
         except Exception as e:
             st.error(f"Database initialization failed: {str(e)}")
             raise
+
+    def _run_schema_migrations(self, cursor):
+        """Apply safe, idempotent schema migrations.
+        Currently: drop legacy 'default_mode' column from user_preferences if present.
+        """
+        try:
+            # Check if legacy column exists
+            cursor.execute("""
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = 'user_preferences'
+                  AND column_name = 'default_mode'
+            """)
+            if cursor.fetchone():
+                # Drop legacy column safely
+                try:
+                    cursor.execute("ALTER TABLE user_preferences DROP COLUMN IF EXISTS default_mode")
+                except Exception:
+                    # Fallback without IF EXISTS for older Postgres versions
+                    cursor.execute("ALTER TABLE user_preferences DROP COLUMN default_mode")
+        except Exception as _:
+            # Do not block app startup for migration issues; proceed silently
+            pass
 
     def register_user(self, username, email, password):
         """Register new user with enhanced error handling"""
@@ -236,7 +278,7 @@ class AuthHandler:
 
             cursor.execute("""
                 SELECT u.username, u.email, u.created_at, u.last_login,
-                       p.theme, p.default_mode, p.email_notifications
+                       p.theme, p.email_notifications
                 FROM users u
                 LEFT JOIN user_preferences p ON u.id = p.user_id
                 WHERE u.id = %s
@@ -254,8 +296,7 @@ class AuthHandler:
                     "created_at": result[2],
                     "last_login": result[3],
                     "theme": result[4] or 'dark',
-                    "default_mode": result[5] or 'Beginner',
-                    "email_notifications": result[6] if result[6] is not None else True
+                    "email_notifications": result[5] if result[5] is not None else True
                 }
             return None
 
@@ -263,7 +304,7 @@ class AuthHandler:
             st.error(f"Error getting user info: {str(e)}")
             return None
 
-    def update_user_preferences(self, user_id, theme=None, default_mode=None, email_notifications=None):
+    def update_user_preferences(self, user_id, theme=None, email_notifications=None):
         """Update user preferences"""
         try:
             conn = self._get_connection()
@@ -275,9 +316,6 @@ class AuthHandler:
             if theme is not None:
                 updates.append("theme = %s")
                 params.append(theme)
-            if default_mode is not None:
-                updates.append("default_mode = %s")
-                params.append(default_mode)
             if email_notifications is not None:
                 updates.append("email_notifications = %s")
                 params.append(email_notifications)

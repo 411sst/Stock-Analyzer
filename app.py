@@ -221,7 +221,7 @@ st.markdown("""
         font-size: 13px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.05em;
         color: var(--color-text-secondary);
         background-color: var(--color-bg-secondary);
         padding: 12px 16px;
@@ -454,8 +454,6 @@ def initialize_session_state():
         st.session_state.logged_in = False
     if 'user' not in st.session_state:
         st.session_state.user = None
-    if 'mode' not in st.session_state:
-        st.session_state.mode = "Beginner"
     if 'selected_stock' not in st.session_state:
         st.session_state.selected_stock = 'RELIANCE.NS'
     if 'show_ml_details' not in st.session_state:
@@ -482,7 +480,7 @@ def create_password_strength_indicator(password):
             <span style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--color-text-secondary);">Password Strength:</span>
             <span style="font-family: 'Inter', sans-serif; color: {color}; font-weight: 600; font-size: 13px;">{strength_text}</span>
         </div>
-        <div style="background-color: var(--color-border-subtle); border-radius: 2px; height: 3px; overflow: hidden;">
+        <div style="background-color: var(--color-border-subtle); border-radius: 2px; height: 4px; overflow: hidden;">
             <div style="background-color: {color}; width: {score}%; height: 100%; border-radius: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
         </div>
     </div>
@@ -608,23 +606,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # Mode Selection
-    st.markdown("### Trading Mode")
-    mode_options = ["Beginner", "Pro", "Expert"]
-    mode_descriptions = {
-        "Beginner": "Simple analysis with explanations",
-        "Pro": "Advanced technical indicators",
-        "Expert": "Full ML predictions & risk analysis"
-    }
-
-    selected_mode = st.selectbox(
-        "Select your experience level:",
-        mode_options,
-        index=mode_options.index(st.session_state.mode)
-    )
-    st.session_state.mode = selected_mode
-    st.caption(mode_descriptions[selected_mode])
-
+    # Removed global Trading Mode (Beginner/Pro/Expert). Pages now show detailed views by default.
     st.markdown("---")
 
     # Navigation
@@ -679,16 +661,16 @@ with st.sidebar:
 
 # Main Content Area
 if selected_nav == "Market Overview":
-    market_overview_page(st.session_state.mode)
+    market_overview_page()
 
 elif selected_nav == "Stock Analysis":
-    stock_analysis_page(st.session_state.mode)
+    stock_analysis_page()
 
 elif selected_nav == "Portfolio Tracker":
-    portfolio_tracker_page(st.session_state.mode)
+    portfolio_tracker_page()
 
 elif selected_nav == "News & Sentiment":
-    news_sentiment_page(st.session_state.mode)
+    news_sentiment_page()
 
 elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
     if not st.session_state.logged_in:
@@ -1735,12 +1717,6 @@ elif selected_nav == "User Settings" and ENHANCED_FEATURES and st.session_state.
                 index=0 if user.get('theme', 'dark') == 'dark' else 1
             )
 
-            default_mode = st.selectbox(
-                "Default Trading Mode",
-                ["Beginner", "Pro", "Expert"],
-                index=["Beginner", "Pro", "Expert"].index(user.get('default_mode', 'Beginner'))
-            )
-
         with col2:
             email_notifications = st.checkbox(
                 "Email Notifications",
@@ -1756,7 +1732,6 @@ elif selected_nav == "User Settings" and ENHANCED_FEATURES and st.session_state.
             success = st.session_state.auth_handler.update_user_preferences(
                 user['id'],
                 theme=theme_preference.lower(),
-                default_mode=default_mode,
                 email_notifications=email_notifications
             )
 
@@ -1764,7 +1739,6 @@ elif selected_nav == "User Settings" and ENHANCED_FEATURES and st.session_state.
                 st.success("Preferences updated successfully")
                 st.session_state.user.update({
                     'theme': theme_preference.lower(),
-                    'default_mode': default_mode,
                     'email_notifications': email_notifications
                 })
             else:

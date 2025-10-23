@@ -3,7 +3,7 @@ import streamlit as st
 from utils.data_fetcher import fetch_news_sources
 from utils.sentiment_analysis import create_sentiment_trend_chart, create_sector_sentiment_chart, create_market_buzz_chart
 
-def news_sentiment_page(mode):
+def news_sentiment_page():
     st.header("News & Sentiment Analysis")
     
     # Filters
@@ -49,40 +49,36 @@ def news_sentiment_page(mode):
         # Create a container for each news item
         container = st.container()
         
-        # Determine sentiment colors
-        if item['sentiment'] == 'positive':
-            sentiment_color = "🟢"
-            sentiment_emoji = "📈"
-        elif item['sentiment'] == 'negative':
-            sentiment_color = "🔴"
-            sentiment_emoji = "📉"
-        else:
-            sentiment_color = "🟡"
-            sentiment_emoji = "📊"
+        # Determine sentiment display color
+        sentiment_var = (
+            "var(--color-positive)" if item['sentiment'] == 'positive' else
+            "var(--color-negative)" if item['sentiment'] == 'negative' else
+            "var(--color-text-secondary)"
+        )
         
         with container:
             # Create the news card with working link
             st.markdown(f"""
-            <div style="border: 1px solid #444; border-radius: 8px; padding: 15px; margin: 10px 0; background-color: #1a1a1a;">
-                <h4 style="color: white; margin-top: 0;">{item['title']}</h4>
+            <div style="border: 1px solid var(--color-border-default); border-radius: 8px; padding: 15px; margin: 10px 0; background-color: var(--color-bg-secondary);">
+                <h4 style="color: var(--color-text-primary); margin-top: 0;">{item['title']}</h4>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <div>
-                        <span style="color: #888; font-size: 14px;">📰 {item['source']}</span>
-                        <span style="color: #888; font-size: 14px; margin-left: 15px;">📊 Score: {item['score']:.2f}</span>
+                        <span style="color: var(--color-text-secondary); font-size: 14px;">{item['source']}</span>
+                        <span style="color: var(--color-text-secondary); font-size: 14px; margin-left: 15px;">Score: {item['score']:.2f}</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="background-color: #333; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
-                            {sentiment_emoji} {item['sentiment'].upper()}
+                        <div style="background-color: var(--color-bg-tertiary); color: var(--color-text-primary); padding: 5px 10px; border-radius: 6px; font-size: 12px; border: 1px solid var(--color-border-subtle);">
+                            <span style="color: {sentiment_var}; font-weight: 600;">{item['sentiment'].upper()}</span>
                         </div>
                         <a href="{item.get('url', '#')}" target="_blank" style="
-                            background-color: #1a73e8; 
-                            color: white; 
+                            background-color: var(--color-info); 
+                            color: #000; 
                             padding: 8px 12px; 
-                            border-radius: 5px; 
+                            border-radius: 6px; 
                             text-decoration: none; 
                             font-size: 12px;
-                            font-weight: bold;
-                        ">📖 Read More</a>
+                            font-weight: 700;
+                        ">Read More</a>
                     </div>
                 </div>
             </div>
@@ -120,16 +116,15 @@ def news_sentiment_page(mode):
     else:
         st.info("No market buzz data available.")
     
-    # Detailed Analysis (only visible in Pro mode)
-    if mode == "Pro":
-        st.markdown("---")
-        st.subheader("Detailed Sentiment Analysis")
-        
-        st.markdown("#### How Sentiment Analysis Works")
-        st.write("Our system uses natural language processing to analyze the sentiment of news articles. Here's how we classify them:")
-        st.write("- 📈 Positive: Articles with positive sentiment score above +0.3")
-        st.write("- 📉 Negative: Articles with negative sentiment score below -0.3")
-        st.write("- 📊 Neutral: Articles with sentiment score between -0.3 and +0.3")
-        
-        st.markdown("#### Sentiment Score Distribution")
-        st.info("Histogram showing distribution of sentiment scores would appear here in a full implementation.")
+    # Detailed Analysis (always visible; global modes removed)
+    st.markdown("---")
+    st.subheader("Detailed Sentiment Analysis")
+    
+    st.markdown("#### How Sentiment Analysis Works")
+    st.write("Our system uses natural language processing to analyze the sentiment of news articles. Here's how we classify them:")
+    st.write("- 📈 Positive: Articles with positive sentiment score above +0.3")
+    st.write("- 📉 Negative: Articles with negative sentiment score below -0.3")
+    st.write("- 📊 Neutral: Articles with sentiment score between -0.3 and +0.3")
+    
+    st.markdown("#### Sentiment Score Distribution")
+    st.info("Histogram showing distribution of sentiment scores would appear here in a full implementation.")

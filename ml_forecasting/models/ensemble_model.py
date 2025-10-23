@@ -4,6 +4,28 @@ import streamlit as st
 from datetime import datetime, timedelta
 import warnings
 import hashlib
+
+# Optional heavy libraries (guarded imports)
+try:
+    from statsmodels.tsa.stattools import adfuller
+    from statsmodels.tsa.arima.model import ARIMA
+    _HAS_STATSMODELS = True
+except Exception:
+    _HAS_STATSMODELS = False
+
+try:
+    from sklearn.linear_model import LinearRegression
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.preprocessing import MinMaxScaler
+    _HAS_SKLEARN = True
+except Exception:
+    _HAS_SKLEARN = False
+
+try:
+    import tensorflow as tf
+    _HAS_TF = True
+except Exception:
+    _HAS_TF = False
 warnings.filterwarnings('ignore')
 
 class EnsembleModel:
@@ -14,11 +36,25 @@ class EnsembleModel:
             'seasonal_naive': self._seasonal_naive_model,
             'exponential_smoothing': self._exponential_smoothing_model
         }
+        # Optionally extend with heavy models if available
+        if _HAS_STATSMODELS:
+            self.models['arima'] = self._arima_model
+        if _HAS_SKLEARN:
+            self.models['sk_linear'] = self._sklearn_linear_model
+            self.models['sk_random_forest'] = self._sklearn_rf_model
+        if _HAS_TF:
+            self.models['tf_lstm'] = self._tf_lstm_model
+
+        # Default weights (sum doesn't need to be exactly 1; normalized at combine time)
         self.weights = {
-            'moving_average': 0.3,
-            'linear_trend': 0.25,
-            'seasonal_naive': 0.2,
-            'exponential_smoothing': 0.25
+            'moving_average': 0.18,
+            'linear_trend': 0.14,
+            'seasonal_naive': 0.12,
+            'exponential_smoothing': 0.16,
+            'arima': 0.18 if _HAS_STATSMODELS else 0,
+            'sk_linear': 0.10 if _HAS_SKLEARN else 0,
+            'sk_random_forest': 0.08 if _HAS_SKLEARN else 0,
+            'tf_lstm': 0.04 if _HAS_TF else 0
         }
     
     def _create_deterministic_seed(self, data, symbol=None, steps=7):
@@ -208,6 +244,189 @@ class EnsembleModel:
             
         except Exception as e:
             return np.full(steps, data.iloc[-1] if len(data) > 0 else 100), 0.4
+
+    # ------------------------
+    # Heavy model integrations
+    # ------------------------
+
+    def _arima_model(self, data, steps, seed):
+        """ARIMA(p,d,q) with tiny grid search and ADF-based differencing.
+        Deterministic via fixed results and seeded numpy.
+        """
+        if not _HAS_STATSMODELS or len(data) < 30:
+            return np.full(steps, data.iloc[-1]), 0.5
+        try:
+            np.random.seed(seed + 10)
+            series = pd.Series(data.values, index=data.index)
+            # Decide d with ADF (stationary => d=0 else d=1)
+            try:
+                adf_p = adfuller(series.dropna().values, autolag='AIC')[1]
+                d = 0 if adf_p < 0.05 else 1
+            except Exception:
+                d = 1
+
+            best_aic = np.inf
+            best_order = (1, d, 1)
+            for p in [0, 1, 2]:
+                for q in [0, 1, 2]:
+                    if p == 0 and q == 0:
+                        continue
+                    try:
+                        model = ARIMA(series, order=(p, d, q))
+                        res = model.fit(method_kwargs={"warn_convergence": False})
+                        if res.aic < best_aic:
+                            best_aic = res.aic
+                            best_order = (p, d, q)
+                    except Exception:
+                        continue
+            # Fit best order
+            model = ARIMA(series, order=best_order)
+            res = model.fit(method_kwargs={"warn_convergence": False})
+            fc = res.forecast(steps=steps)
+            preds = np.array(fc, dtype=float)
+            # Clean
+            base = float(series.iloc[-1])
+            preds = np.nan_to_num(preds, nan=base)
+            preds = np.where(preds <= 0, base * 0.9, preds)
+
+            # Confidence via in-sample residual std
+            resid_std = float(np.std(res.resid)) if hasattr(res, 'resid') else np.std(series.values - series.values.mean())
+            data_std = float(series.pct_change().std() or 0.01)
+            conf = max(0.45, min(0.85, 0.75 - (resid_std / (abs(series.iloc[-1]) + 1e-6)) - data_std))
+            return preds, conf
+        except Exception:
+            return np.full(steps, data.iloc[-1]), 0.5
+
+    def _build_lag_features(self, series, look_back=10):
+        values = np.asarray(series, dtype=float)
+        X, y = [], []
+        for i in range(look_back, len(values)):
+            X.append(values[i - look_back:i])
+            y.append(values[i])
+        return np.array(X), np.array(y)
+
+    def _sklearn_linear_model(self, data, steps, seed):
+        if not _HAS_SKLEARN or len(data) < 25:
+            return np.full(steps, data.iloc[-1]), 0.5
+        try:
+            np.random.seed(seed + 20)
+            X, y = self._build_lag_features(data.values, look_back=10)
+            if len(y) < 10:
+                return np.full(steps, data.iloc[-1]), 0.5
+            split = int(len(X) * 0.8)
+            X_train, y_train = X[:split], y[:split]
+            X_val, y_val = X[split:], y[split:] if split < len(X) else (X[-5:], y[-5:])
+
+            model = LinearRegression()
+            model.fit(X_train, y_train)
+
+            # recursive multi-step forecast
+            window = list(X[-1])
+            preds = []
+            for _ in range(steps):
+                inp = np.array(window[-10:]).reshape(1, -1)
+                yhat = float(model.predict(inp)[0])
+                preds.append(yhat)
+                window.append(yhat)
+
+            # Confidence via validation RMSE
+            val_pred = model.predict(X_val)
+            rmse = float(np.sqrt(np.mean((val_pred - y_val) ** 2))) if len(y_val) else 0.0
+            scale = abs(float(data.iloc[-1])) + 1e-6
+            conf = max(0.4, min(0.85, 0.8 - (rmse / scale)))
+            return np.array(preds), conf
+        except Exception:
+            return np.full(steps, data.iloc[-1]), 0.5
+
+    def _sklearn_rf_model(self, data, steps, seed):
+        if not _HAS_SKLEARN or len(data) < 50:
+            return np.full(steps, data.iloc[-1]), 0.5
+        try:
+            np.random.seed(seed + 30)
+            X, y = self._build_lag_features(data.values, look_back=15)
+            if len(y) < 20:
+                return np.full(steps, data.iloc[-1]), 0.5
+            split = int(len(X) * 0.8)
+            X_train, y_train = X[:split], y[:split]
+            X_val, y_val = X[split:], y[split:] if split < len(X) else (X[-10:], y[-10:])
+
+            rf = RandomForestRegressor(
+                n_estimators=150,
+                max_depth=8,
+                random_state=seed + 31,
+                n_jobs=-1
+            )
+            rf.fit(X_train, y_train)
+
+            window = list(X[-1])
+            preds = []
+            for _ in range(steps):
+                inp = np.array(window[-15:]).reshape(1, -1)
+                yhat = float(rf.predict(inp)[0])
+                preds.append(yhat)
+                window.append(yhat)
+
+            val_pred = rf.predict(X_val)
+            rmse = float(np.sqrt(np.mean((val_pred - y_val) ** 2))) if len(y_val) else 0.0
+            scale = abs(float(data.iloc[-1])) + 1e-6
+            conf = max(0.4, min(0.85, 0.78 - (rmse / scale)))
+            return np.array(preds), conf
+        except Exception:
+            return np.full(steps, data.iloc[-1]), 0.5
+
+    def _tf_lstm_model(self, data, steps, seed):
+        if not (_HAS_TF and len(data) >= 60):
+            return np.full(steps, data.iloc[-1]), 0.45
+        try:
+            # Deterministic seeds
+            np.random.seed(seed + 40)
+            tf.random.set_seed(seed + 41)
+
+            values = data.values.astype(float)
+            scaler = MinMaxScaler(feature_range=(0, 1)) if _HAS_SKLEARN else None
+            scaled = scaler.fit_transform(values.reshape(-1, 1)).flatten() if scaler else values / (abs(values).max() + 1e-6)
+
+            look_back = 20
+            X, y = [], []
+            for i in range(look_back, len(scaled)):
+                X.append(scaled[i - look_back:i])
+                y.append(scaled[i])
+            X, y = np.array(X), np.array(y)
+
+            split = int(0.8 * len(X))
+            X_train, y_train = X[:split], y[:split]
+            X_val, y_val = X[split:], y[split:] if split < len(X) else (X[-20:], y[-20:])
+
+            X_train = X_train.reshape((-1, look_back, 1))
+            X_val = X_val.reshape((-1, look_back, 1))
+
+            model = tf.keras.Sequential([
+                tf.keras.layers.Input(shape=(look_back, 1)),
+                tf.keras.layers.LSTM(32, activation='tanh'),
+                tf.keras.layers.Dense(1)
+            ])
+            model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), loss='mse')
+            model.fit(X_train, y_train, epochs=5, batch_size=32, verbose=0, validation_data=(X_val, y_val))
+
+            # Recursive forecast
+            window = scaled[-look_back:].tolist()
+            preds_scaled = []
+            for _ in range(steps):
+                arr = np.array(window[-look_back:]).reshape((1, look_back, 1))
+                yhat = float(model.predict(arr, verbose=0)[0, 0])
+                preds_scaled.append(yhat)
+                window.append(yhat)
+
+            preds = scaler.inverse_transform(np.array(preds_scaled).reshape(-1, 1)).flatten() if scaler else np.array(preds_scaled) * (abs(values).max() + 1e-6)
+
+            # Confidence via val loss
+            val_loss = float(model.evaluate(X_val, y_val, verbose=0)) if len(y_val) else 0.005
+            last_price = float(values[-1])
+            conf = max(0.35, min(0.8, 0.7 - val_loss))
+            preds = np.where(preds <= 0, last_price * 0.9, preds)
+            return preds, conf
+        except Exception:
+            return np.full(steps, data.iloc[-1]), 0.45
     
     def _calculate_deterministic_confidence(self, data, predictions, individual_confidences, seed):
         """Calculate TRULY deterministic confidence based on data characteristics only"""
@@ -416,17 +635,18 @@ class EnsembleModel:
                     predictions[model_name] = [base_price + noise for noise in deterministic_noise]
                     confidences[model_name] = 0.35 + ((deterministic_seed % 15) / 200)
             
-            # Calculate weighted ensemble prediction (deterministic)
+            # Calculate weighted ensemble prediction (normalize weights over available preds)
             ensemble_pred = np.zeros(steps)
-            total_weight = 0
-            
+            total_weight = 0.0
             for model_name, weight in self.weights.items():
+                if weight <= 0:
+                    continue
                 if model_name in predictions:
                     pred_array = np.array(predictions[model_name]).flatten()
-                    if len(pred_array) == steps:
+                    if len(pred_array) == steps and not np.any(np.isnan(pred_array)):
                         ensemble_pred += pred_array * weight
                         total_weight += weight
-            
+
             if total_weight > 0:
                 ensemble_pred = ensemble_pred / total_weight
             else:
@@ -478,7 +698,7 @@ class EnsembleModel:
                 'predictions': ensemble_pred,
                 'dates': pred_dates,
                 'confidence': dynamic_confidence,
-                'method': 'Deterministic Ensemble (MA + Trend + Seasonal + ES)',
+                'method': 'Hybrid Ensemble (Classical + ML)',
                 'current_price': current_price,
                 'predicted_price': predicted_price,
                 'price_change_percent': price_change,

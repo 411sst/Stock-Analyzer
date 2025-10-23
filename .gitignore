@@ -1,3 +1,8 @@
+# Ignore local Streamlit secrets (do not commit credentials)
+.streamlit/secrets.toml
+
+# Optional local environment files
+.env
 # Streamlit secrets
 .streamlit/secrets.toml
 

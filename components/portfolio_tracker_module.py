@@ -14,7 +14,7 @@ def load_sample_portfolio():
         {"symbol": "INFY.NS", "quantity": 8, "buy_price": 1450, "buy_date": "2023-09-10"}
     ]
 
-def portfolio_tracker_page(mode):
+def portfolio_tracker_page():
     st.header("Portfolio Tracker")
     
     # Initialize session state for portfolio if not exists
@@ -111,14 +111,35 @@ def portfolio_tracker_page(mode):
     # Convert portfolio to DataFrame for display
     df = pd.DataFrame(st.session_state.portfolio)
     
-    # Get current prices
-    current_prices = {}
-    for symbol in df['symbol'].unique():
-        try:
-            stock = yf.Ticker(symbol)
-            current_prices[symbol] = stock.history(period="1d")['Close'][-1]
-        except:
-            current_prices[symbol] = df[df['symbol'] == symbol]['buy_price'].iloc[0]
+    # Get current prices (batched)
+    current_prices = {symbol: df[df['symbol'] == symbol]['buy_price'].iloc[0] for symbol in df['symbol'].unique()}
+    try:
+        symbols = list(df['symbol'].unique())
+        data = yf.download(symbols, period="1d", progress=False, group_by='ticker', threads=True)
+        if isinstance(data.columns, pd.MultiIndex):
+            if 'Close' in data.columns.get_level_values(0):
+                close_df = data['Close']
+                for sym in close_df.columns:
+                    try:
+                        current_prices[sym] = float(close_df[sym].dropna().iloc[-1])
+                    except Exception:
+                        pass
+            else:
+                for sym in symbols:
+                    try:
+                        current_prices[sym] = float(data[(sym, 'Close')].dropna().iloc[-1])
+                    except Exception:
+                        pass
+        else:
+            # Single symbol case
+            try:
+                last_close = float(data['Close'].dropna().iloc[-1])
+                if len(symbols) == 1:
+                    current_prices[symbols[0]] = last_close
+            except Exception:
+                pass
+    except Exception:
+        pass
     
     # Add current price and P&L to DataFrame
     df['current_price'] = df['symbol'].map(current_prices)
@@ -145,7 +166,7 @@ def portfolio_tracker_page(mode):
         with col6:
             st.write(f"{row['quantity']}")
         with col7:
-            if st.button("🗑️", key=f"delete_{i}_{row['symbol']}"):
+            if st.button("Delete", key=f"delete_{i}_{row['symbol']}"):
                 st.session_state.portfolio = remove_from_portfolio(st.session_state.portfolio, i)
                 st.rerun()
     
@@ -166,12 +187,12 @@ def portfolio_tracker_page(mode):
     st.subheader("Asset Allocation")
     
     # Placeholder for pie chart
-    st.info("📊 Asset allocation visualization will be added in the next update.")
+    st.info("Asset allocation visualization will be added in the next update.")
     
     # Coming Soon Banner
     st.markdown("---")
     st.markdown("""
-    <div style='padding: 15px; background-color: #1f2937; border-left: 4px solid #3b82f6; border-radius: 5px;'>
-        <strong>🚀 Coming Soon:</strong> Auto-sync with brokers functionality for automatic portfolio updates.
+    <div style='padding: 15px; background-color: var(--color-bg-secondary); border-left: 4px solid var(--color-info); border-radius: 8px; border: 1px solid var(--color-border-subtle); color: var(--color-text-primary);'>
+        <strong>Coming Soon:</strong> Auto-sync with brokers functionality for automatic portfolio updates.
     </div>
     """, unsafe_allow_html=True)
