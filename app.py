@@ -425,9 +425,9 @@ st.markdown("""
         margin: 8px 0 24px 0; /* add small top margin, keep bottom spacing */
         border: 1px solid var(--color-border-subtle);
     }
-    .auth-container h3, .auth-container .stMarkdown h3 {
-        margin-top: 0; /* remove extra gap at top inside the card */
-    }
+    .auth-container h3, .auth-container .stMarkdown h3 { margin-top: 0; }
+    /* Reduce spacing between header and container */
+    section[data-testid="stSidebar"] h3 + .stMarkdown div.auth-container { margin-top: 8px; }
     .success-message {
         font-family: var(--font-ui);
         font-size: 14px;
@@ -515,8 +515,9 @@ with st.sidebar:
     # Authentication Section
     if ENHANCED_FEATURES:
         if not st.session_state.logged_in:
-            st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+            # Header first to avoid extra top padding block
             st.markdown("### User Authentication")
+            st.markdown('<div class="auth-container">', unsafe_allow_html=True)
 
             auth_tab1, auth_tab2 = st.tabs(["Login", "Register"])
 
