@@ -200,6 +200,8 @@ st.markdown("""
     /* Table Typography - Right-align financial columns */
     .stDataFrame, .stTable {
         font-family: var(--font-ui);
+        border-radius: 8px;
+        overflow: hidden;
     }
 
     .stDataFrame th, .stTable th {
@@ -209,6 +211,10 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: var(--text-secondary);
+        background-color: var(--bg-secondary);
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+        text-align: right;
     }
 
     .stDataFrame td, .stTable td {
@@ -217,14 +223,49 @@ st.markdown("""
         font-weight: 400;
         text-align: right;
         font-variant-numeric: tabular-nums;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+        transition: background-color 0.15s ease;
     }
 
-    /* Form Elements */
+    .stDataFrame tbody tr:hover td, .stTable tbody tr:hover td {
+        background-color: var(--bg-tertiary);
+    }
+
+    .stDataFrame tbody tr:last-child td, .stTable tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* First column (typically labels) should be left-aligned */
+    .stDataFrame td:first-child, .stTable td:first-child,
+    .stDataFrame th:first-child, .stTable th:first-child {
+        text-align: left;
+        font-family: var(--font-ui);
+        font-weight: 500;
+    }
+
+    /* Form Elements - Enhanced Focus States */
     .stTextInput input, .stSelectbox select, .stTextArea textarea {
         font-family: var(--font-ui);
         font-size: 15px;
         font-weight: 400;
         line-height: 1.5;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        padding: 10px 14px;
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+    }
+
+    .stTextInput input:hover, .stSelectbox select:hover, .stTextArea textarea:hover {
+        border-color: var(--border-default);
+    }
+
+    .stTextInput input:focus, .stSelectbox select:focus, .stTextArea textarea:focus {
+        border-color: var(--interactive-default);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
     }
 
     .stTextInput label, .stSelectbox label, .stTextArea label {
@@ -233,6 +274,79 @@ st.markdown("""
         font-weight: 500;
         letter-spacing: 0.3px;
         color: var(--text-secondary);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* Password Input Specific Styling */
+    .stTextInput input[type="password"] {
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 2px;
+    }
+
+    /* Checkbox Styling */
+    .stCheckbox {
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text-primary);
+    }
+
+    /* Select Dropdown */
+    .stSelectbox select {
+        cursor: pointer;
+    }
+
+    .stSelectbox select option {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        padding: 8px;
+    }
+
+    /* Global Border Radius Standardization */
+    .stAlert, .stInfo, .stWarning, .stError, .stSuccess {
+        border-radius: 8px;
+    }
+
+    .stExpander {
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 6px 6px 0 0;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+
+    .stTabs [data-baseweb="tab-border"] {
+        height: 2px;
+        background-color: var(--interactive-default);
+    }
+
+    /* Sidebar Refinements */
+    .css-1d391kg, .css-1lcbmhc {
+        border-radius: 8px;
+    }
+
+    /* Radio Buttons */
+    .stRadio > label {
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text-primary);
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+
+    .stRadio > label:hover {
+        background-color: var(--bg-tertiary);
     }
 
     .reportview-container {
@@ -991,10 +1105,10 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                         size=13
                                     )
                                 ),
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                paper_bgcolor='rgba(0,0,0,0)',
+                                plot_bgcolor='#0F0F0F',
+                                paper_bgcolor='#0F0F0F',
                                 xaxis=dict(
-                                    gridcolor='#1A1A1A',
+                                    gridcolor='#242424',
                                     gridwidth=1,
                                     showline=False,
                                     zeroline=False,
@@ -1005,7 +1119,7 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                     )
                                 ),
                                 yaxis=dict(
-                                    gridcolor='#1A1A1A',
+                                    gridcolor='#242424',
                                     gridwidth=1,
                                     showline=False,
                                     zeroline=False,
@@ -1016,7 +1130,17 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                         color='#A0A0A0'
                                     )
                                 ),
-                                showlegend=True
+                                showlegend=True,
+                                hovermode='x unified',
+                                hoverlabel=dict(
+                                    bgcolor='#1A1A1A',
+                                    bordercolor='#404040',
+                                    font=dict(
+                                        family='JetBrains Mono, monospace',
+                                        size=13,
+                                        color='#FFFFFF'
+                                    )
+                                )
                             )
                             
                             # Display the chart
@@ -1099,72 +1223,95 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                         # Risk Analysis Dashboard
                         if risk_metrics and show_risk_metrics:
                             st.markdown("---")
-                            st.subheader("⚖️ Risk Analysis Dashboard")
+                            st.subheader("Risk Analysis Dashboard")
                             
                             col1, col2 = st.columns(2)
                             
                             with col1:
                                 try:
-                                    # Risk Gauge Chart
+                                    # Horizontal Risk Bar (Replaces Gauge)
                                     risk_score = risk_metrics.get('risk_score', 50)
-                                    
-                                    gauge_fig = go.Figure(go.Indicator(
-                                        mode="gauge+number",
-                                        value=risk_score,
-                                        domain={'x': [0, 1], 'y': [0, 1]},
-                                        title={
-                                            'text': "Risk Score",
-                                            'font': {
-                                                'family': 'Inter, sans-serif',
-                                                'size': 18,
-                                                'weight': 600,
-                                                'color': '#FFFFFF'
-                                            }
-                                        },
-                                        number={
-                                            'font': {
-                                                'family': 'JetBrains Mono, monospace',
-                                                'size': 40,
-                                                'color': '#FFFFFF'
-                                            }
-                                        },
-                                        gauge={
-                                            'axis': {
-                                                'range': [None, 100],
-                                                'tickwidth': 2,
-                                                'tickcolor': "#A0A0A0",
-                                                'tickfont': {
-                                                    'family': 'JetBrains Mono, monospace',
-                                                    'size': 12,
-                                                    'color': '#A0A0A0'
-                                                }
-                                            },
-                                            'bar': {'color': "#EF4444" if risk_score > 70 else "#F59E0B" if risk_score > 50 else "#10B981"},
-                                            'steps': [
-                                                {'range': [0, 30], 'color': "rgba(16, 185, 129, 0.2)"},
-                                                {'range': [30, 60], 'color': "rgba(245, 158, 11, 0.2)"},
-                                                {'range': [60, 80], 'color': "rgba(239, 68, 68, 0.2)"},
-                                                {'range': [80, 100], 'color': "rgba(239, 68, 68, 0.3)"}
-                                            ],
-                                            'threshold': {
-                                                'line': {'color': "#EF4444", 'width': 3},
-                                                'thickness': 0.75,
-                                                'value': 85
-                                            }
-                                        }
-                                    ))
 
-                                    gauge_fig.update_layout(
-                                        height=300,
-                                        template='plotly_dark',
-                                        font=dict(family='Inter, sans-serif', size=13, color='#A0A0A0'),
-                                        paper_bgcolor='rgba(0,0,0,0)',
-                                        plot_bgcolor='rgba(0,0,0,0)'
-                                    )
-                                    
-                                    st.plotly_chart(gauge_fig, use_container_width=True)
-                                except Exception as gauge_error:
-                                    st.info(f"Risk gauge temporarily unavailable: {str(gauge_error)}")
+                                    # Determine risk level and color
+                                    if risk_score < 40:
+                                        risk_level = "Low Risk"
+                                        risk_color = "#10B981"
+                                    elif risk_score < 70:
+                                        risk_level = "Moderate Risk"
+                                        risk_color = "#F59E0B"
+                                    else:
+                                        risk_level = "High Risk"
+                                        risk_color = "#EF4444"
+
+                                    st.markdown(f"""
+                                    <div style="
+                                        background-color: var(--bg-secondary);
+                                        border: 1px solid var(--border-subtle);
+                                        border-radius: 8px;
+                                        padding: 24px;
+                                        height: 300px;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                    ">
+                                        <div style="margin-bottom: 24px;">
+                                            <h3 style="
+                                                font-family: 'Inter', sans-serif;
+                                                font-size: 18px;
+                                                font-weight: 600;
+                                                color: #FFFFFF;
+                                                margin: 0 0 8px 0;
+                                            ">Risk Assessment</h3>
+                                            <div style="
+                                                font-family: 'JetBrains Mono', monospace;
+                                                font-size: 48px;
+                                                font-weight: 600;
+                                                color: {risk_color};
+                                                line-height: 1.2;
+                                                margin-bottom: 4px;
+                                            ">{risk_score}<span style="font-size: 24px; color: var(--text-secondary);">/100</span></div>
+                                            <div style="
+                                                font-family: 'Inter', sans-serif;
+                                                font-size: 14px;
+                                                font-weight: 500;
+                                                color: var(--text-secondary);
+                                            ">{risk_level}</div>
+                                        </div>
+
+                                        <div style="margin-top: 16px;">
+                                            <div style="
+                                                background-color: var(--border-subtle);
+                                                height: 8px;
+                                                border-radius: 4px;
+                                                overflow: hidden;
+                                                position: relative;
+                                            ">
+                                                <div style="
+                                                    background-color: {risk_color};
+                                                    width: {risk_score}%;
+                                                    height: 100%;
+                                                    border-radius: 4px;
+                                                    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                                                "></div>
+                                            </div>
+                                            <div style="
+                                                display: flex;
+                                                justify-content: space-between;
+                                                margin-top: 8px;
+                                                font-family: 'Inter', sans-serif;
+                                                font-size: 11px;
+                                                color: var(--text-tertiary);
+                                            ">
+                                                <span>Low</span>
+                                                <span>Moderate</span>
+                                                <span>High</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+
+                                except Exception as risk_error:
+                                    st.info(f"Risk indicator temporarily unavailable: {str(risk_error)}")
                             
                             with col2:
                                 try:
@@ -1231,14 +1378,23 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                                 template='plotly_dark',
                                                 height=300,
                                                 showlegend=False,
+                                                plot_bgcolor='#0F0F0F',
+                                                paper_bgcolor='#0F0F0F',
                                                 xaxis=dict(
+                                                    gridcolor='#242424',
                                                     tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
                                                 ),
                                                 yaxis=dict(
                                                     zeroline=True,
-                                                    zerolinewidth=2,
-                                                    zerolinecolor='rgba(128,128,128,0.5)',
+                                                    zerolinewidth=1,
+                                                    zerolinecolor='#404040',
+                                                    gridcolor='#242424',
                                                     tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                                ),
+                                                hoverlabel=dict(
+                                                    bgcolor='#1A1A1A',
+                                                    bordercolor='#404040',
+                                                    font=dict(family='JetBrains Mono, monospace', size=12)
                                                 )
                                             )
                                             
@@ -1271,8 +1427,21 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                             yaxis_title="Return (%)",
                                             template='plotly_dark',
                                             height=300,
-                                            xaxis=dict(tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')),
-                                            yaxis=dict(tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0'))
+                                            plot_bgcolor='#0F0F0F',
+                                            paper_bgcolor='#0F0F0F',
+                                            xaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                            ),
+                                            yaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                            ),
+                                            hoverlabel=dict(
+                                                bgcolor='#1A1A1A',
+                                                bordercolor='#404040',
+                                                font=dict(family='JetBrains Mono, monospace', size=12)
+                                            )
                                         )
                                         
                                         st.plotly_chart(stress_fig, use_container_width=True)
@@ -1330,6 +1499,8 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                         yaxis_title="Price (₹)",
                                         template='plotly_dark',
                                         height=400,
+                                        plot_bgcolor='#0F0F0F',
+                                        paper_bgcolor='#0F0F0F',
                                         legend=dict(
                                             orientation="h",
                                             yanchor="bottom",
@@ -1338,8 +1509,19 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                             x=1,
                                             font=dict(family='Inter, sans-serif', size=12)
                                         ),
-                                        xaxis=dict(tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')),
-                                        yaxis=dict(tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0'))
+                                        xaxis=dict(
+                                            gridcolor='#242424',
+                                            tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                        ),
+                                        yaxis=dict(
+                                            gridcolor='#242424',
+                                            tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                        ),
+                                        hoverlabel=dict(
+                                            bgcolor='#1A1A1A',
+                                            bordercolor='#404040',
+                                            font=dict(family='JetBrains Mono, monospace', size=13)
+                                        )
                                     )
 
                                     st.plotly_chart(model_fig, use_container_width=True)
@@ -1366,8 +1548,21 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                             yaxis_title="Confidence (%)",
                                             template='plotly_dark',
                                             height=300,
-                                            xaxis=dict(tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')),
-                                            yaxis=dict(tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0'))
+                                            plot_bgcolor='#0F0F0F',
+                                            paper_bgcolor='#0F0F0F',
+                                            xaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                            ),
+                                            yaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                            ),
+                                            hoverlabel=dict(
+                                                bgcolor='#1A1A1A',
+                                                bordercolor='#404040',
+                                                font=dict(family='JetBrains Mono, monospace', size=12)
+                                            )
                                         )
                                         
                                         st.plotly_chart(conf_fig, use_container_width=True)
