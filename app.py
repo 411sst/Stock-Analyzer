@@ -1,474 +1,73 @@
-# app.py - Enhanced Indian Stock Trading Dashboard with Fixed Charts
 import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
-import plotly.express as px
 import yfinance as yf
-
-# Import existing modules
 from components.market_overview_module import market_overview_page
 from components.stock_analysis_module import stock_analysis_page
 from components.portfolio_tracker_module import portfolio_tracker_page
 from components.news_sentiment_module import news_sentiment_page
+from components.live_market_module import live_market_page
 from utils.indian_stocks import INDIAN_STOCKS
 
-# Import new authentication and ML modules
 try:
     from authentication.auth_handler import AuthHandler
-    from authentication.validators import validate_email, validate_password, validate_username, get_password_strength_score, get_password_strength_text
+    from authentication.validators import (
+        validate_email, validate_password, validate_username,
+        get_password_strength_score, get_password_strength_text,
+    )
     from ml_forecasting.models.ensemble_model import EnsembleModel
     ENHANCED_FEATURES = True
-except ImportError as e:
+except Exception:
     ENHANCED_FEATURES = False
-    st.sidebar.error(f"⚠️ Enhanced features not available: {str(e)}")
 
-# Set page config
 st.set_page_config(
     page_title="Indian Stock Dashboard - Enhanced",
-    page_icon="📊",  # Keeping minimal page icon for browser tab only
+    page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-# Custom CSS for enhanced UI with systematic color palette and typography
-st.markdown("""
+st.markdown(
+    """
 <style>
-    /* Font Imports */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-    /* Design System - CSS Variables */
-    :root {
-        /* Color System - Backgrounds */
-        --color-bg-primary: #0F0F0F;
-        --color-bg-secondary: #1A1A1A;
-        --color-bg-tertiary: #242424;
-
-        /* Color System - Borders */
-        --color-border-subtle: #2A2A2A;
-        --color-border-default: #404040;
-        --color-border-strong: #525252;
-
-        /* Color System - Text */
-        --color-text-primary: #FFFFFF;
-        --color-text-secondary: #A0A0A0;
-        --color-text-tertiary: #707070;
-
-        /* Color System - Semantic */
-        --color-positive: #10B981;
-        --color-negative: #EF4444;
-        --color-warning: #F59E0B;
-        --color-info: #3B82F6;
-
-        /* Color System - Interactive */
-        --color-interactive-default: #FFFFFF;
-        --color-interactive-hover: #E5E5E5;
-        --color-interactive-active: #D4D4D4;
-
-        /* Spacing Scale */
-        --space-xs: 4px;
-        --space-sm: 8px;
-        --space-md: 16px;
-        --space-lg: 24px;
-        --space-xl: 32px;
-        --space-xxl: 48px;
-
-        /* Border Radius */
-        --radius-sm: 6px;
-        --radius-md: 8px;
-
-        /* Typography Scale */
-        --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-        --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
-    }
-
-    /*
-    TYPOGRAPHY SYSTEM DOCUMENTATION
-
-    UI Text (Inter):
-    - Weight 400 (Regular): Body text, descriptions
-    - Weight 500 (Medium): Labels, form fields, secondary headings
-    - Weight 600 (Semibold): Buttons, primary headings, emphasis
-    - Weight 700 (Bold): H1, major page titles
-    - Fallback: -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif
-
-    Financial Data (JetBrains Mono):
-    - Weight 400 (Regular): Standard numerical display
-    - Weight 500 (Medium): Emphasized numbers, metric values
-    - Weight 600 (Semibold): Large financial figures, primary metrics
-    - Fallback: SF Mono, Monaco, Cascadia Code, Roboto Mono, Consolas, monospace
-    - Feature: font-variant-numeric: tabular-nums (ensures digit alignment)
-
-    Line Height Ratios:
-    - Headings (h1-h3): 1.2-1.4 (tighter for visual impact)
-    - Body text: 1.5-1.6 (optimal readability)
-    - Captions/labels: 1.4 (balanced for small text)
-    - Financial data: 1.4 (maintains alignment in tables)
-    */
-
-    /* Base Typography */
-    body, .stApp {
-        font-family: var(--font-ui);
-        font-size: 15px;
-        font-weight: 400;
-        line-height: 1.6;
-        color: var(--color-text-primary);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* Heading Hierarchy */
-    h1, .stTitle {
-        font-family: var(--font-ui);
-        font-size: 32px;
-        font-weight: 700;
-        line-height: 1.2;
-        letter-spacing: -0.02em;
-        color: var(--color-text-primary);
-        margin-bottom: var(--space-md);
-    }
-
-    h2, .stHeader {
-        font-family: var(--font-ui);
-        font-size: 24px;
-        font-weight: 600;
-        line-height: 1.3;
-        letter-spacing: -0.01em;
-        color: var(--color-text-primary);
-        margin-bottom: 12px;
-    }
-
-    h3, .stSubheader {
-        font-family: var(--font-ui);
-        font-size: 18px;
-        font-weight: 600;
-        line-height: 1.4;
-        color: var(--color-text-primary);
-        margin-bottom: var(--space-sm);
-    }
-
-    /* Body Text */
-    p, .stMarkdown, .stText {
-        font-family: var(--font-ui);
-        font-size: 15px;
-        font-weight: 400;
-        line-height: 1.6;
-        color: var(--color-text-primary);
-    }
-
-    /* Caption/Label Text */
-    label, .stCaption, small, caption {
-        font-family: var(--font-ui);
-        font-size: 13px;
-        font-weight: 500;
-        line-height: 1.4;
-        letter-spacing: 0.02em;
-        text-transform: none;
-        color: var(--color-text-secondary);
-    }
-
-    /* Financial Data - Monospace Typography */
-    .metric-value, .price, .percentage, .quantity, .financial-data,
-    .stMetric, .stMetricValue, [data-testid="stMetricValue"],
-    .stDataFrame td, .stTable td {
-        font-family: var(--font-mono);
-        font-variant-numeric: tabular-nums;
-        font-weight: 500;
-    }
-
-    /* Metric Cards - Enhanced Typography */
-    .stMetric {
-        font-family: var(--font-ui);
-    }
-
-    .stMetric label, [data-testid="stMetricLabel"] {
-        font-family: var(--font-ui);
-        font-size: 13px;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-        color: var(--color-text-secondary);
-        line-height: 1.4;
-    }
-
-    .stMetric [data-testid="stMetricValue"] {
-        font-family: var(--font-mono);
-        font-size: 28px;
-        font-weight: 600;
-        line-height: 1.2;
-        color: var(--color-text-primary);
-        font-variant-numeric: tabular-nums;
-    }
-
-    .stMetric [data-testid="stMetricDelta"] {
-        font-family: var(--font-mono);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 1.4;
-        font-variant-numeric: tabular-nums;
-    }
-
-    /* Table Typography - Right-align financial columns */
-    .stDataFrame, .stTable {
-        font-family: var(--font-ui);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .stDataFrame th, .stTable th {
-        font-family: var(--font-ui);
-        font-size: 13px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--color-text-secondary);
-        background-color: var(--color-bg-secondary);
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--color-border-subtle);
-        text-align: right;
-    }
-
-    .stDataFrame td, .stTable td {
-        font-family: var(--font-mono);
-        font-size: 14px;
-        font-weight: 400;
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-        padding: 10px 16px;
-        border-bottom: 1px solid var(--color-border-subtle);
-        transition: background-color 0.15s ease;
-    }
-
-    .stDataFrame tbody tr:hover td, .stTable tbody tr:hover td {
-        background-color: var(--color-bg-tertiary);
-    }
-
-    .stDataFrame tbody tr:last-child td, .stTable tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* First column (typically labels) should be left-aligned */
-    .stDataFrame td:first-child, .stTable td:first-child,
-    .stDataFrame th:first-child, .stTable th:first-child {
-        text-align: left;
-        font-family: var(--font-ui);
-        font-weight: 500;
-    }
-
-    /* Form Elements - Enhanced Focus States */
-    .stTextInput input, .stSelectbox select, .stTextArea textarea {
-        font-family: var(--font-ui);
-        font-size: 15px;
-        font-weight: 400;
-        line-height: 1.5;
-        background-color: var(--color-bg-secondary);
-        border: 1px solid var(--color-border-subtle);
-        border-radius: 8px;
-        padding: 10px 14px;
-        color: var(--color-text-primary);
-        transition: all 0.2s ease;
-    }
-
-    /* Placeholder color */
-    .stTextInput input::placeholder, .stTextArea textarea::placeholder {
-        color: var(--color-text-secondary);
-        opacity: 0.7;
-    }
-
-    .stTextInput input:hover, .stSelectbox select:hover, .stTextArea textarea:hover {
-        border-color: var(--color-border-default);
-    }
-
-    .stTextInput input:focus, .stSelectbox select:focus, .stTextArea textarea:focus {
-        border-color: var(--color-interactive-default);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
-    }
-
-    .stTextInput label, .stSelectbox label, .stTextArea label {
-        font-family: var(--font-ui);
-        font-size: 13px;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-        color: var(--color-text-secondary);
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    /* Password Input Specific Styling */
-    .stTextInput input[type="password"] {
-        font-family: 'JetBrains Mono', monospace;
-        letter-spacing: 2px;
-    }
-
-    /* Checkbox Styling */
-    .stCheckbox {
-        font-family: var(--font-ui);
-        font-size: 14px;
-        font-weight: 400;
-        color: var(--color-text-primary);
-    }
-
-    /* Select Dropdown */
-    .stSelectbox select {
-        cursor: pointer;
-    }
-
-    .stSelectbox select option {
-        background-color: var(--color-bg-secondary);
-        color: var(--color-text-primary);
-        padding: 8px;
-    }
-
-    /* Global Border Radius Standardization */
-    .stAlert, .stInfo, .stWarning, .stError, .stSuccess {
-        border-radius: 8px;
-    }
-
-    .stExpander {
-        border-radius: 8px;
-        border: 1px solid var(--color-border-subtle);
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 6px 6px 0 0;
-        font-family: var(--font-ui);
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-
-    .stTabs [data-baseweb="tab-border"] {
-        height: 2px;
-        background-color: var(--color-interactive-default);
-    }
-    .stTabs [data-baseweb="tab-highlight"] {
-        height: 2px;
-        background-color: var(--color-info) !important;
-    }
-
-    /* Sidebar Refinements */
-    .css-1d391kg, .css-1lcbmhc {
-        border-radius: 8px;
-    }
-
-    /* Sidebar header spacing: tighten below custom title */
-    .sidebar-title h1 {
-        margin: 0 0 8px 0 !important;
-    }
-    section[data-testid="stSidebar"] .stMarkdown p {
-        margin-top: 0;
-        margin-bottom: 8px;
-    }
-
-    /* Radio Buttons */
-    .stRadio > label {
-        font-family: var(--font-ui);
-        font-size: 14px;
-        font-weight: 400;
-        color: var(--color-text-primary);
-        padding: 8px 12px;
-        border-radius: 6px;
-        transition: background-color 0.2s ease;
-    }
-
-    .stRadio > label:hover {
-        background-color: var(--color-bg-tertiary);
-    }
-
-    .reportview-container {
-        background-color: var(--color-bg-primary);
-        color: var(--color-text-primary);
-    }
-    .sidebar .sidebar-content {
-        background-color: var(--color-bg-secondary);
-    }
-    .metric-container {
-        background-color: var(--color-bg-secondary);
-        border-radius: 8px;
-        padding: 16px;
-        border: 1px solid var(--color-border-subtle);
-    }
-    .stButton button {
-        font-family: var(--font-ui);
-        font-size: 15px;
-        font-weight: 600;
-        line-height: 1.5;
-        background-color: var(--color-interactive-default);
-        color: #000000;
-        border-radius: 6px;
-        border: none;
-        padding: 10px 16px;
-        transition: all 0.2s ease;
-    }
-    .stButton button:hover {
-        background-color: var(--color-interactive-hover);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .user-info {
-        padding: 24px;
-        background-color: var(--color-bg-secondary);
-        border: 1px solid var(--color-border-subtle);
-        border-radius: 8px;
-        margin-bottom: 24px;
-        color: var(--color-text-primary);
-    }
-    .auth-container {
-        background-color: var(--color-bg-secondary);
-        padding: 12px 16px 16px 16px; /* reduce top padding to tighten whitespace */
-        border-radius: 8px;
-        margin: 8px 0 24px 0; /* add small top margin, keep bottom spacing */
-        border: 1px solid var(--color-border-subtle);
-    }
-    .auth-container h3, .auth-container .stMarkdown h3 { margin-top: 0; }
-    /* Reduce spacing between header and container */
-    section[data-testid="stSidebar"] h3 + .stMarkdown div.auth-container { margin-top: 8px; }
-    .success-message {
-        font-family: var(--font-ui);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 1.5;
-        padding: 12px 16px;
-        background-color: transparent;
-        border-left: 3px solid var(--color-positive);
-        border-radius: 0;
-        color: #D1FAE5;
-        margin: 10px 0;
-    }
-    .error-message {
-        font-family: var(--font-ui);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 1.5;
-        padding: 12px 16px;
-        background-color: transparent;
-        border-left: 3px solid var(--color-negative);
-        border-radius: 0;
-        color: #FECACA;
-        margin: 10px 0;
-    }
-    .prediction-card {
-        background-color: var(--color-bg-secondary);
-        border-radius: 8px;
-        padding: 24px;
-        margin: 24px 0;
-        border: 1px solid var(--color-border-subtle);
-    }
-    .ml-metric {
-        text-align: center;
-        padding: 16px;
-        background-color: var(--color-bg-secondary);
-        border-radius: 8px;
-        margin: 8px;
-        border: 1px solid var(--color-border-subtle);
-    }
+.sidebar-title h1 { margin: 0 0 8px 0 !important; }
+.auth-container { background-color: #1A1A1A; padding: 12px 16px 16px 16px; border-radius: 8px; border: 1px solid #2A2A2A; }
+.user-info { padding: 16px; background-color: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 8px; margin: 8px 0 16px 0; }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+if 'user' not in st.session_state:
+    st.session_state.user = None
+if 'selected_stock' not in st.session_state:
+    st.session_state.selected_stock = 'RELIANCE.NS'
+if 'show_ml_details' not in st.session_state:
+    st.session_state.show_ml_details = False
+
+def create_password_strength_indicator(password):
+    if not password:
+        return ""
+    score = get_password_strength_score(password)
+    strength_text, color = get_password_strength_text(score)
+    return f"""
+    <div style="margin: 16px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--color-text-secondary);">Password Strength:</span>
+            <span style="font-family: 'Inter', sans-serif; color: {color}; font-weight: 600; font-size: 13px;">{strength_text}</span>
+        </div>
+        <div style="background-color: var(--color-border-subtle); border-radius: 2px; height: 4px; overflow: hidden;">
+            <div style="background-color: {color}; width: {score}%; height: 100%; border-radius: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+        </div>
+    </div>
+    """
+
+if ENHANCED_FEATURES and 'auth_handler' not in st.session_state:
+    st.session_state.auth_handler = AuthHandler()
 
 # Initialize session state
 def initialize_session_state():
@@ -632,7 +231,7 @@ with st.sidebar:
 
     # Navigation
     st.markdown("### Navigation")
-    nav_options = ["Market Overview", "Stock Analysis", "Portfolio Tracker", "News & Sentiment"]
+    nav_options = ["Live Market", "Market Overview", "Stock Analysis", "Portfolio Tracker", "News & Sentiment"]
 
     if ENHANCED_FEATURES and st.session_state.logged_in:
         nav_options.extend(["ML Predictions", "User Settings"])
@@ -673,6 +272,9 @@ with st.sidebar:
 # Main Content Area
 if selected_nav == "Market Overview":
     market_overview_page()
+
+elif selected_nav == "Live Market":
+    live_market_page()
 
 elif selected_nav == "Stock Analysis":
     stock_analysis_page()
