@@ -27,82 +27,423 @@ except ImportError as e:
 # Set page config
 st.set_page_config(
     page_title="Indian Stock Dashboard - Enhanced",
-    page_icon="📈",
+    page_icon="📊",  # Keeping minimal page icon for browser tab only
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for enhanced UI
+# Custom CSS for enhanced UI with systematic color palette and typography
 st.markdown("""
 <style>
+    /* Font Imports */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    /* Design System - CSS Variables */
+    :root {
+        /* Color System - Backgrounds */
+        --color-bg-primary: #0F0F0F;
+        --color-bg-secondary: #1A1A1A;
+        --color-bg-tertiary: #242424;
+
+        /* Color System - Borders */
+        --color-border-subtle: #2A2A2A;
+        --color-border-default: #404040;
+        --color-border-strong: #525252;
+
+        /* Color System - Text */
+        --color-text-primary: #FFFFFF;
+        --color-text-secondary: #A0A0A0;
+        --color-text-tertiary: #707070;
+
+        /* Color System - Semantic */
+        --color-positive: #10B981;
+        --color-negative: #EF4444;
+        --color-warning: #F59E0B;
+        --color-info: #3B82F6;
+
+        /* Color System - Interactive */
+        --color-interactive-default: #FFFFFF;
+        --color-interactive-hover: #E5E5E5;
+        --color-interactive-active: #D4D4D4;
+
+        /* Spacing Scale */
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 24px;
+        --space-xl: 32px;
+        --space-xxl: 48px;
+
+        /* Border Radius */
+        --radius-sm: 6px;
+        --radius-md: 8px;
+
+        /* Typography Scale */
+        --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+    }
+
+    /*
+    TYPOGRAPHY SYSTEM DOCUMENTATION
+
+    UI Text (Inter):
+    - Weight 400 (Regular): Body text, descriptions
+    - Weight 500 (Medium): Labels, form fields, secondary headings
+    - Weight 600 (Semibold): Buttons, primary headings, emphasis
+    - Weight 700 (Bold): H1, major page titles
+    - Fallback: -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif
+
+    Financial Data (JetBrains Mono):
+    - Weight 400 (Regular): Standard numerical display
+    - Weight 500 (Medium): Emphasized numbers, metric values
+    - Weight 600 (Semibold): Large financial figures, primary metrics
+    - Fallback: SF Mono, Monaco, Cascadia Code, Roboto Mono, Consolas, monospace
+    - Feature: font-variant-numeric: tabular-nums (ensures digit alignment)
+
+    Line Height Ratios:
+    - Headings (h1-h3): 1.2-1.4 (tighter for visual impact)
+    - Body text: 1.5-1.6 (optimal readability)
+    - Captions/labels: 1.4 (balanced for small text)
+    - Financial data: 1.4 (maintains alignment in tables)
+    */
+
+    /* Base Typography */
+    body, .stApp {
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--color-text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Heading Hierarchy */
+    h1, .stTitle {
+        font-family: var(--font-ui);
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: var(--color-text-primary);
+        margin-bottom: var(--space-md);
+    }
+
+    h2, .stHeader {
+        font-family: var(--font-ui);
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+        color: var(--color-text-primary);
+        margin-bottom: 12px;
+    }
+
+    h3, .stSubheader {
+        font-family: var(--font-ui);
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.4;
+        color: var(--color-text-primary);
+        margin-bottom: var(--space-sm);
+    }
+
+    /* Body Text */
+    p, .stMarkdown, .stText {
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: var(--color-text-primary);
+    }
+
+    /* Caption/Label Text */
+    label, .stCaption, small, caption {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+    }
+
+    /* Financial Data - Monospace Typography */
+    .metric-value, .price, .percentage, .quantity, .financial-data,
+    .stMetric, .stMetricValue, [data-testid="stMetricValue"],
+    .stDataFrame td, .stTable td {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+    }
+
+    /* Metric Cards - Enhanced Typography */
+    .stMetric {
+        font-family: var(--font-ui);
+    }
+
+    .stMetric label, [data-testid="stMetricLabel"] {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        line-height: 1.4;
+    }
+
+    .stMetric [data-testid="stMetricValue"] {
+        font-family: var(--font-mono);
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.2;
+        color: var(--color-text-primary);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .stMetric [data-testid="stMetricDelta"] {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.4;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Table Typography - Right-align financial columns */
+    .stDataFrame, .stTable {
+        font-family: var(--font-ui);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .stDataFrame th, .stTable th {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--color-text-secondary);
+        background-color: var(--color-bg-secondary);
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--color-border-subtle);
+        text-align: right;
+    }
+
+    .stDataFrame td, .stTable td {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 400;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--color-border-subtle);
+        transition: background-color 0.15s ease;
+    }
+
+    .stDataFrame tbody tr:hover td, .stTable tbody tr:hover td {
+        background-color: var(--color-bg-tertiary);
+    }
+
+    .stDataFrame tbody tr:last-child td, .stTable tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* First column (typically labels) should be left-aligned */
+    .stDataFrame td:first-child, .stTable td:first-child,
+    .stDataFrame th:first-child, .stTable th:first-child {
+        text-align: left;
+        font-family: var(--font-ui);
+        font-weight: 500;
+    }
+
+    /* Form Elements - Enhanced Focus States */
+    .stTextInput input, .stSelectbox select, .stTextArea textarea {
+        font-family: var(--font-ui);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.5;
+        background-color: var(--color-bg-secondary);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: 6px;
+        padding: 10px 14px;
+        color: var(--color-text-primary);
+        transition: all 0.2s ease;
+    }
+
+    .stTextInput input:hover, .stSelectbox select:hover, .stTextArea textarea:hover {
+        border-color: var(--color-border-default);
+    }
+
+    .stTextInput input:focus, .stSelectbox select:focus, .stTextArea textarea:focus {
+        border-color: var(--color-interactive-default);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    }
+
+    .stTextInput label, .stSelectbox label, .stTextArea label {
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* Password Input Specific Styling */
+    .stTextInput input[type="password"] {
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 2px;
+    }
+
+    /* Checkbox Styling */
+    .stCheckbox {
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--color-text-primary);
+    }
+
+    /* Select Dropdown */
+    .stSelectbox select {
+        cursor: pointer;
+    }
+
+    .stSelectbox select option {
+        background-color: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+        padding: 8px;
+    }
+
+    /* Global Border Radius Standardization */
+    .stAlert, .stInfo, .stWarning, .stError, .stSuccess {
+        border-radius: 8px;
+    }
+
+    .stExpander {
+        border-radius: 8px;
+        border: 1px solid var(--color-border-subtle);
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 6px 6px 0 0;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+
+    .stTabs [data-baseweb="tab-border"] {
+        height: 2px;
+        background-color: var(--color-interactive-default);
+    }
+
+    /* Sidebar Refinements */
+    .css-1d391kg, .css-1lcbmhc {
+        border-radius: 8px;
+    }
+
+    /* Radio Buttons */
+    .stRadio > label {
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--color-text-primary);
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+
+    .stRadio > label:hover {
+        background-color: var(--color-bg-tertiary);
+    }
+
     .reportview-container {
-        background-color: #0e1117;
-        color: white;
+        background-color: var(--color-bg-primary);
+        color: var(--color-text-primary);
     }
     .sidebar .sidebar-content {
-        background-color: #1a1c23;
+        background-color: var(--color-bg-secondary);
     }
     .metric-container {
-        background-color: #1a1c23;
+        background-color: var(--color-bg-secondary);
         border-radius: 8px;
-        padding: 15px;
-        border: 1px solid #333;
+        padding: 16px;
+        border: 1px solid var(--color-border-subtle);
     }
     .stButton button {
-        background-color: #1a73e8;
-        color: white;
-        border-radius: 5px;
-        border: none;
-        padding: 0.5rem 1rem;
+        font-family: var(--font-ui);
+        font-size: 15px;
         font-weight: 600;
+        line-height: 1.5;
+        background-color: var(--color-interactive-default);
+        color: #000000;
+        border-radius: 6px;
+        border: none;
+        padding: 10px 16px;
+        transition: all 0.2s ease;
     }
     .stButton button:hover {
-        background-color: #1557b0;
-        border: none;
+        background-color: var(--color-interactive-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .user-info {
-        padding: 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
-        margin-bottom: 15px;
-        color: white;
+        padding: 24px;
+        background-color: var(--color-bg-secondary);
+        border: 1px solid var(--color-border-subtle);
+        border-radius: 8px;
+        margin-bottom: 24px;
+        color: var(--color-text-primary);
     }
     .auth-container {
-        background-color: #262730;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 15px;
+        background-color: var(--color-bg-secondary);
+        padding: 24px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        border: 1px solid var(--color-border-subtle);
     }
     .success-message {
-        padding: 10px;
-        background-color: #1f4e3d;
-        border: 1px solid #10b981;
-        border-radius: 5px;
-        color: #10b981;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        padding: 12px 16px;
+        background-color: transparent;
+        border-left: 3px solid var(--color-positive);
+        border-radius: 0;
+        color: #D1FAE5;
         margin: 10px 0;
     }
     .error-message {
-        padding: 10px;
-        background-color: #4c1d1d;
-        border: 1px solid #ef4444;
-        border-radius: 5px;
-        color: #ef4444;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        padding: 12px 16px;
+        background-color: transparent;
+        border-left: 3px solid var(--color-negative);
+        border-radius: 0;
+        color: #FECACA;
         margin: 10px 0;
     }
     .prediction-card {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-        border-radius: 12px;
-        padding: 20px;
-        margin: 15px 0;
-        border: 1px solid #4f46e5;
+        background-color: var(--color-bg-secondary);
+        border-radius: 8px;
+        padding: 24px;
+        margin: 24px 0;
+        border: 1px solid var(--color-border-subtle);
     }
     .ml-metric {
         text-align: center;
-        padding: 15px;
-        background-color: #1f2937;
+        padding: 16px;
+        background-color: var(--color-bg-secondary);
         border-radius: 8px;
-        margin: 5px;
-        border: 1px solid #374151;
+        margin: 8px;
+        border: 1px solid var(--color-border-subtle);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -136,29 +477,29 @@ def create_password_strength_indicator(password):
     strength_text, color = get_password_strength_text(score)
 
     return f"""
-    <div style="margin: 10px 0;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px;">Password Strength:</span>
-            <span style="color: {color}; font-weight: bold; font-size: 12px;">{strength_text}</span>
+    <div style="margin: 16px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--color-text-secondary);">Password Strength:</span>
+            <span style="font-family: 'Inter', sans-serif; color: {color}; font-weight: 600; font-size: 13px;">{strength_text}</span>
         </div>
-        <div style="background-color: #374151; border-radius: 10px; height: 8px; margin: 5px 0;">
-            <div style="background-color: {color}; width: {score}%; height: 100%; border-radius: 10px; transition: width 0.3s;"></div>
+        <div style="background-color: var(--color-border-subtle); border-radius: 2px; height: 3px; overflow: hidden;">
+            <div style="background-color: {color}; width: {score}%; height: 100%; border-radius: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
         </div>
     </div>
     """
 
 # Sidebar Content
 with st.sidebar:
-    st.title("📈 Indian Stock Dashboard")
+    st.title("Indian Stock Dashboard")
     st.markdown("*Enhanced with AI & Authentication*")
 
     # Authentication Section
     if ENHANCED_FEATURES:
         if not st.session_state.logged_in:
             st.markdown('<div class="auth-container">', unsafe_allow_html=True)
-            st.markdown("### 🔐 User Authentication")
+            st.markdown("### User Authentication")
 
-            auth_tab1, auth_tab2 = st.tabs(["🔑 Login", "👤 Register"])
+            auth_tab1, auth_tab2 = st.tabs(["Login", "Register"])
 
             with auth_tab1:
                 with st.form("login_form", clear_on_submit=False):
@@ -172,7 +513,7 @@ with st.sidebar:
                     with col2:
                         st.markdown('<small><a href="#" style="color: #60a5fa;">Forgot?</a></small>', unsafe_allow_html=True)
 
-                    login_submit = st.form_submit_button("🚪 Login", use_container_width=True)
+                    login_submit = st.form_submit_button("Login", use_container_width=True)
 
                     if login_submit:
                         if username and password:
@@ -181,12 +522,12 @@ with st.sidebar:
                                 if user_id:
                                     st.session_state.logged_in = True
                                     st.session_state.user = st.session_state.auth_handler.get_user_info(user_id)
-                                    st.markdown('<div class="success-message">✅ Login successful!</div>', unsafe_allow_html=True)
+                                    st.markdown('<div class="success-message">Login successful</div>', unsafe_allow_html=True)
                                     st.rerun()
                                 else:
-                                    st.markdown(f'<div class="error-message">❌ {message}</div>', unsafe_allow_html=True)
+                                    st.markdown(f'<div class="error-message">{message}</div>', unsafe_allow_html=True)
                         else:
-                            st.markdown('<div class="error-message">❌ Please fill in all fields</div>', unsafe_allow_html=True)
+                            st.markdown('<div class="error-message">Please fill in all fields</div>', unsafe_allow_html=True)
 
             with auth_tab2:
                 with st.form("register_form", clear_on_submit=False):
@@ -202,11 +543,11 @@ with st.sidebar:
 
                     agree_terms = st.checkbox("I agree to the Terms of Service and Privacy Policy")
 
-                    register_submit = st.form_submit_button("🎯 Create Account", use_container_width=True)
+                    register_submit = st.form_submit_button("Create Account", use_container_width=True)
 
                     if register_submit:
                         if not agree_terms:
-                            st.markdown('<div class="error-message">❌ Please agree to the terms</div>', unsafe_allow_html=True)
+                            st.markdown('<div class="error-message">Please agree to the terms</div>', unsafe_allow_html=True)
                         elif new_username and new_email and new_password and confirm_password:
                             # Validate inputs
                             username_valid, username_msg = validate_username(new_username)
@@ -214,23 +555,23 @@ with st.sidebar:
                             password_valid, password_msg = validate_password(new_password, confirm_password)
 
                             if not username_valid:
-                                st.markdown(f'<div class="error-message">❌ {username_msg}</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="error-message">{username_msg}</div>', unsafe_allow_html=True)
                             elif not email_valid:
-                                st.markdown(f'<div class="error-message">❌ {email_msg}</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="error-message">{email_msg}</div>', unsafe_allow_html=True)
                             elif not password_valid:
-                                st.markdown(f'<div class="error-message">❌ {password_msg}</div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="error-message">{password_msg}</div>', unsafe_allow_html=True)
                             else:
                                 with st.spinner("Creating account..."):
                                     success, message = st.session_state.auth_handler.register_user(
                                         new_username, new_email, new_password
                                     )
                                     if success:
-                                        st.markdown('<div class="success-message">✅ Registration successful! Please login.</div>', unsafe_allow_html=True)
+                                        st.markdown('<div class="success-message">Registration successful! Please login.</div>', unsafe_allow_html=True)
                                         st.balloons()
                                     else:
-                                        st.markdown(f'<div class="error-message">❌ {message}</div>', unsafe_allow_html=True)
+                                        st.markdown(f'<div class="error-message">{message}</div>', unsafe_allow_html=True)
                         else:
-                            st.markdown('<div class="error-message">❌ Please fill in all fields</div>', unsafe_allow_html=True)
+                            st.markdown('<div class="error-message">Please fill in all fields</div>', unsafe_allow_html=True)
 
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -241,13 +582,13 @@ with st.sidebar:
             <div class="user-info">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div>
-                        <h4 style="margin: 0;">👋 Welcome, {user['username']}</h4>
-                        <small>📧 {user['email']}</small><br>
-                        <small>🕒 Last login: {user.get('last_login', 'Never')}</small>
+                        <h4 style="margin: 0;">Welcome, {user['username']}</h4>
+                        <small>{user['email']}</small><br>
+                        <small>Last login: {user.get('last_login', 'Never')}</small>
                     </div>
                     <div style="text-align: right;">
                         <div style="background-color: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 15px; font-size: 11px;">
-                            ✨ Premium User
+                            Premium User
                         </div>
                     </div>
                 </div>
@@ -257,10 +598,10 @@ with st.sidebar:
             # User actions
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("👤 Profile", use_container_width=True):
+                if st.button("Profile", use_container_width=True):
                     st.session_state.show_profile = True
             with col2:
-                if st.button("🚪 Logout", use_container_width=True):
+                if st.button("Logout", use_container_width=True):
                     st.session_state.logged_in = False
                     st.session_state.user = None
                     st.rerun()
@@ -268,7 +609,7 @@ with st.sidebar:
     st.markdown("---")
 
     # Mode Selection
-    st.markdown("### 🎯 Trading Mode")
+    st.markdown("### Trading Mode")
     mode_options = ["Beginner", "Pro", "Expert"]
     mode_descriptions = {
         "Beginner": "Simple analysis with explanations",
@@ -287,11 +628,11 @@ with st.sidebar:
     st.markdown("---")
 
     # Navigation
-    st.markdown("### 🧭 Navigation")
-    nav_options = ["📊 Market Overview", "📈 Stock Analysis", "💼 Portfolio Tracker", "📰 News & Sentiment"]
+    st.markdown("### Navigation")
+    nav_options = ["Market Overview", "Stock Analysis", "Portfolio Tracker", "News & Sentiment"]
 
     if ENHANCED_FEATURES and st.session_state.logged_in:
-        nav_options.extend(["🤖 ML Predictions", "⚙️ User Settings"])
+        nav_options.extend(["ML Predictions", "User Settings"])
 
     selected_nav = st.radio(
         "Choose a section:",
@@ -302,7 +643,7 @@ with st.sidebar:
     st.markdown("---")
 
     # Quick Stats
-    st.markdown("### 📊 Quick Market Stats")
+    st.markdown("### Quick Market Stats")
     try:
         nifty = yf.download("^NSEI", period="1d", interval="1m")
         if not nifty.empty:
@@ -319,15 +660,15 @@ with st.sidebar:
 
     # Feature availability indicator
     st.markdown("---")
-    st.markdown("### 🚀 Features Available")
+    st.markdown("### Features Available")
     if ENHANCED_FEATURES:
-        st.markdown("✅ User Authentication")
-        st.markdown("✅ ML-Powered Predictions")
-        st.markdown("✅ Personal Portfolio")
-        st.markdown("✅ Advanced Analytics")
+        st.markdown("• User Authentication")
+        st.markdown("• ML-Powered Predictions")
+        st.markdown("• Personal Portfolio")
+        st.markdown("• Advanced Analytics")
     else:
-        st.markdown("⚠️ Basic features only")
-        st.markdown("💡 Install ML packages for full experience")
+        st.markdown("• Basic features only")
+        st.markdown("• Install ML packages for full experience")
 
     # Footer
     st.markdown("---")
@@ -337,45 +678,45 @@ with st.sidebar:
     )
 
 # Main Content Area
-if selected_nav == "📊 Market Overview":
+if selected_nav == "Market Overview":
     market_overview_page(st.session_state.mode)
 
-elif selected_nav == "📈 Stock Analysis":
+elif selected_nav == "Stock Analysis":
     stock_analysis_page(st.session_state.mode)
 
-elif selected_nav == "💼 Portfolio Tracker":
+elif selected_nav == "Portfolio Tracker":
     portfolio_tracker_page(st.session_state.mode)
 
-elif selected_nav == "📰 News & Sentiment":
+elif selected_nav == "News & Sentiment":
     news_sentiment_page(st.session_state.mode)
 
-elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
+elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
     if not st.session_state.logged_in:
-        st.warning("🔒 Please login to access ML-powered predictions.")
-        st.info("💡 Register for free to unlock advanced AI features!")
+        st.warning("Please login to access ML-powered predictions.")
+        st.info("Register for free to unlock advanced AI features")
     else:
-        st.title("🤖 AI-Powered Stock Predictions & Risk Analysis")
+        st.title("AI-Powered Stock Predictions & Risk Analysis")
         st.markdown("*Advanced machine learning models with comprehensive risk assessment*")
 
         # Stock selection
         col1, col2, col3 = st.columns([2, 1, 1])
         with col1:
             selected_stock = st.selectbox(
-                "📊 Select Stock for AI Analysis:",
+                "Select Stock for AI Analysis:",
                 list(INDIAN_STOCKS.keys()),
                 format_func=lambda x: f"{INDIAN_STOCKS[x]} ({x})"
             )
 
         with col2:
             prediction_period = st.selectbox(
-                "⏱️ Prediction Period:",
+                "Prediction Period:",
                 ["1 Week", "2 Weeks", "1 Month"],
                 index=0
             )
 
         with col3:
             analysis_depth = st.selectbox(
-                "📈 Analysis Level:",
+                "Analysis Level:",
                 ["Basic", "Advanced", "Professional"],
                 index=1
             )
@@ -384,7 +725,7 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
         prediction_steps = steps_map[prediction_period]
 
         # Advanced Settings
-        with st.expander("🔧 Advanced Model & Risk Settings", expanded=False):
+        with st.expander("Advanced Model & Risk Settings", expanded=False):
             col1, col2, col3 = st.columns(3)
 
             with col1:
@@ -407,7 +748,7 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
 
         # Quick Market Context
         with st.container():
-            st.markdown("### 📊 Quick Market Context")
+            st.markdown("### Quick Market Context")
             context_cols = st.columns(4)
 
             try:
@@ -437,7 +778,7 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
         st.markdown("---")
 
         # Main Prediction Button
-        if st.button("🚀 Generate AI Prediction & Risk Analysis", type="primary", use_container_width=True):
+        if st.button("Generate AI Prediction & Risk Analysis", type="primary", use_container_width=True):
 
             # Progress tracking
             progress_bar = st.progress(0)
@@ -445,25 +786,25 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
 
             try:
                 # Step 1: Data Collection
-                status_text.text("📡 Fetching historical data...")
+                status_text.text("Fetching historical data...")
                 progress_bar.progress(10)
 
                 stock_data = yf.download(selected_stock, period="2y", progress=False)
 
                 if stock_data.empty:
-                    st.error("❌ Unable to fetch stock data. Please try another stock.")
+                    st.error("Unable to fetch stock data. Please try another stock.")
                 else:
                     # Step 2: Data Preprocessing
-                    status_text.text("🔍 Preprocessing data...")
+                    status_text.text("Preprocessing data...")
                     progress_bar.progress(25)
 
                     close_data = stock_data['Close'].dropna()
 
                     if len(close_data) < 30:
-                        st.warning("⚠️ Very limited historical data. Results may be less accurate.")
+                        st.warning("Very limited historical data. Results may be less accurate.")
 
                     # Step 3: ML Model Training
-                    status_text.text("🧠 Training AI models...")
+                    status_text.text("Training AI models...")
                     progress_bar.progress(40)
 
                     ensemble_model = EnsembleModel()
@@ -474,7 +815,7 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                     )
 
                     # Step 4: Risk Analysis
-                    status_text.text("⚖️ Performing risk analysis...")
+                    status_text.text("Performing risk analysis...")
                     progress_bar.progress(60)
 
                     try:
@@ -530,27 +871,27 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                             risk_metrics = None
 
                     # Step 5: Validation
-                    status_text.text("✅ Validating predictions...")
+                    status_text.text("Validating predictions...")
                     progress_bar.progress(80)
 
                     validation_checks, is_valid = ensemble_model.validate_prediction(prediction_result)
 
                     # Step 6: Results Display
-                    status_text.text("🎨 Preparing results...")
+                    status_text.text("Preparing results...")
                     progress_bar.progress(100)
 
                     progress_bar.empty()
                     status_text.empty()
 
                     if not is_valid:
-                        st.error("❌ Prediction validation failed. Please try again.")
+                        st.error("Prediction validation failed. Please try again.")
                         with st.expander("Debug Information"):
                             st.json(validation_checks)
                     else:
-                        st.success("✅ AI Analysis Complete!")
+                        st.success("AI Analysis Complete")
 
                         st.markdown("---")
-                        st.subheader("🎯 AI Prediction Results")
+                        st.subheader("AI Prediction Results")
 
                         current_price = prediction_result.get('current_price', 0)
                         predicted_price = prediction_result.get('predicted_price', 0)
@@ -560,35 +901,27 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                         metric_cols = st.columns(4)
 
                         with metric_cols[0]:
-                            st.metric("💰 Current Price", f"₹{current_price:.2f}")
+                            st.metric("Current Price", f"₹{current_price:.2f}")
 
                         with metric_cols[1]:
-                            arrow = "↗️" if price_change > 0 else "↘️" if price_change < 0 else "➡️"
-                            st.metric(f"🎯 Predicted Price", f"₹{predicted_price:.2f}", f"{price_change:+.1f}% {arrow}")
+                            direction = "▲" if price_change > 0 else "▼" if price_change < 0 else "—"
+                            st.metric("Predicted Price", f"₹{predicted_price:.2f}", f"{price_change:+.1f}% {direction}")
 
                         with metric_cols[2]:
-                            conf_color = "🟢" if confidence > 0.7 else "🟡" if confidence > 0.5 else "🔴"
-                            st.metric(f"{conf_color} AI Confidence", f"{confidence:.1%}")
+                            st.metric("AI Confidence", f"{confidence:.1%}")
 
                         with metric_cols[3]:
                             if risk_metrics:
                                 risk_score = risk_metrics.get('risk_score', 50)
-                                risk_color = "🟢" if risk_score < 40 else "🟡" if risk_score < 70 else "🔴"
-                                st.metric(f"{risk_color} Risk Score", f"{risk_score}/100")
+                                st.metric("Risk Score", f"{risk_score}/100")
                             else:
-                                st.metric("📊 Data Points", f"{len(close_data)}")
+                                st.metric("Data Points", f"{len(close_data)}")
 
                         # COMPLETELY FIXED CHARTS SECTION - ERROR RESOLVED
                         st.markdown("---")
-                        st.subheader("📈 Price Prediction Visualization")
+                        st.subheader("Price Prediction Visualization")
 
                         try:
-                            # Debug: Check data availability first
-                            st.write("**🔍 Data Debug Info:**")
-                            st.write(f"✅ Historical data points: {len(close_data)}")
-                            st.write(f"✅ Prediction points: {len(prediction_result.get('predictions', []))}")
-                            st.write(f"✅ Current price: ₹{current_price:.2f}")
-                            st.write(f"✅ Predicted price: ₹{predicted_price:.2f}")
                             
                             # Create the chart
                             fig = go.Figure()
@@ -608,11 +941,7 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                         hist_prices = historical_data.values.flatten().tolist()
                                     else:
                                         hist_prices = [float(val) for val in historical_data]
-                                    
-                                    st.write(f"📊 Adding {len(hist_prices)} historical data points")
-                                    st.write(f"📅 Date range: {hist_dates[0]} to {hist_dates[-1]}")
-                                    st.write(f"💰 Price range: ₹{min(hist_prices):.2f} to ₹{max(hist_prices):.2f}")
-                                    
+
                                     # Add historical line
                                     fig.add_trace(go.Scatter(
                                         x=hist_dates,
@@ -622,8 +951,6 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                         line=dict(color='#3b82f6', width=3),
                                         hovertemplate='<b>Historical</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>'
                                     ))
-                                    
-                                    st.success("✅ Historical data plotted successfully!")
                                     
                                 except Exception as hist_error:
                                     st.error(f"Historical data error: {str(hist_error)}")
@@ -662,28 +989,23 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                             continue
                                     
                                     if len(clean_predictions) > 0:
-                                        st.write(f"🔮 Adding {len(clean_predictions)} prediction points")
-                                        st.write(f"💰 Prediction range: ₹{min(clean_predictions):.2f} to ₹{max(clean_predictions):.2f}")
-                                        
                                         # Generate prediction dates (business days only)
                                         try:
                                             if len(historical_data) > 0:
                                                 last_hist_date = hist_dates[-1] if 'hist_dates' in locals() else datetime.now()
                                             else:
                                                 last_hist_date = datetime.now()
-                                            
+
                                             pred_dates = []
                                             current_date = last_hist_date
-                                            
+
                                             for i in range(len(clean_predictions)):
                                                 current_date += timedelta(days=1)
                                                 # Skip weekends for business days
                                                 while current_date.weekday() > 4:  # 5=Saturday, 6=Sunday
                                                     current_date += timedelta(days=1)
                                                 pred_dates.append(current_date)
-                                            
-                                            st.write(f"📅 Prediction dates: {pred_dates[0]} to {pred_dates[-1]}")
-                                            
+
                                             # Add prediction line
                                             fig.add_trace(go.Scatter(
                                                 x=pred_dates,
@@ -694,8 +1016,6 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                                 marker=dict(size=8, color='#ef4444'),
                                                 hovertemplate='<b>Prediction</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>'
                                             ))
-                                            
-                                            st.success("✅ Prediction data plotted successfully!")
                                             
                                             # Add confidence bands
                                             if confidence > 0.3 and len(clean_predictions) > 1:
@@ -737,13 +1057,13 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                             ))
                                     
                                     else:
-                                        st.error("❌ No valid prediction data after cleaning")
-                                        
+                                        st.error("No valid prediction data after cleaning")
+
                                 except Exception as pred_error:
                                     st.error(f"Prediction processing error: {str(pred_error)}")
-                                    
+
                             else:
-                                st.error("❌ No prediction data found")
+                                st.error("No prediction data found")
                             
                             # STEP 3: Add Current Price Reference Line
                             if 'hist_dates' in locals() and 'pred_dates' in locals():
@@ -759,19 +1079,28 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                         line=dict(color='#10b981', width=2, dash='dot'),
                                         hovertemplate='Current Price: ₹%{y:.2f}<extra></extra>'
                                     ))
-                                    
-                                    st.success("✅ Current price reference line added!")
+
                                 except Exception as ref_error:
                                     st.info(f"Reference line skipped: {str(ref_error)}")
-                            
-                            # Update chart layout
+
+                            # Update chart layout with typography
                             fig.update_layout(
                                 title={
-                                    'text': f"📊 {INDIAN_STOCKS.get(selected_stock, selected_stock)} - AI Price Prediction Analysis",
+                                    'text': f"{INDIAN_STOCKS.get(selected_stock, selected_stock)} - AI Price Prediction Analysis",
                                     'x': 0.5,
                                     'xanchor': 'center',
-                                    'font': {'size': 20, 'color': 'white'}
+                                    'font': {
+                                        'family': 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                        'size': 20,
+                                        'weight': 600,
+                                        'color': '#FFFFFF'
+                                    }
                                 },
+                                font=dict(
+                                    family='Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                    size=13,
+                                    color='#A0A0A0'
+                                ),
                                 xaxis_title="Date",
                                 yaxis_title="Price (₹)",
                                 template='plotly_dark',
@@ -782,22 +1111,58 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                     yanchor="bottom",
                                     y=1.02,
                                     xanchor="right",
-                                    x=1
+                                    x=1,
+                                    font=dict(
+                                        family='Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                        size=13
+                                    )
                                 ),
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                showlegend=True
+                                plot_bgcolor='#0F0F0F',
+                                paper_bgcolor='#0F0F0F',
+                                xaxis=dict(
+                                    gridcolor='#242424',
+                                    gridwidth=1,
+                                    showline=False,
+                                    zeroline=False,
+                                    tickfont=dict(
+                                        family='Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+                                        size=12,
+                                        color='#A0A0A0'
+                                    )
+                                ),
+                                yaxis=dict(
+                                    gridcolor='#242424',
+                                    gridwidth=1,
+                                    showline=False,
+                                    zeroline=False,
+                                    tickformat=',.0f',
+                                    tickfont=dict(
+                                        family='JetBrains Mono, monospace',
+                                        size=12,
+                                        color='#A0A0A0'
+                                    )
+                                ),
+                                showlegend=True,
+                                hovermode='x unified',
+                                hoverlabel=dict(
+                                    bgcolor='#1A1A1A',
+                                    bordercolor='#404040',
+                                    font=dict(
+                                        family='JetBrains Mono, monospace',
+                                        size=13,
+                                        color='#FFFFFF'
+                                    )
+                                )
                             )
                             
                             # Display the chart
                             st.plotly_chart(fig, use_container_width=True)
-                            st.success("🎉 Chart generated successfully!")
-                            
+
                         except Exception as chart_error:
-                            st.error(f"❌ Chart generation error: {str(chart_error)}")
-                            
+                            st.error(f"Chart generation error: {str(chart_error)}")
+
                             # Comprehensive debug information
-                            with st.expander("🔧 Full Debug Information", expanded=True):
+                            with st.expander("Full Debug Information", expanded=True):
                                 st.write("**Error Details:**")
                                 st.code(str(chart_error))
                                 
@@ -870,53 +1235,95 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                         # Risk Analysis Dashboard
                         if risk_metrics and show_risk_metrics:
                             st.markdown("---")
-                            st.subheader("⚖️ Risk Analysis Dashboard")
+                            st.subheader("Risk Analysis Dashboard")
                             
                             col1, col2 = st.columns(2)
                             
                             with col1:
                                 try:
-                                    # Risk Gauge Chart
+                                    # Horizontal Risk Bar (Replaces Gauge)
                                     risk_score = risk_metrics.get('risk_score', 50)
-                                    
-                                    gauge_fig = go.Figure(go.Indicator(
-                                        mode="gauge+number",
-                                        value=risk_score,
-                                        domain={'x': [0, 1], 'y': [0, 1]},
-                                        title={'text': "Risk Score", 'font': {'size': 20, 'color': 'white'}},
-                                        number={'font': {'size': 40, 'color': 'white'}},
-                                        gauge={
-                                            'axis': {
-                                                'range': [None, 100], 
-                                                'tickwidth': 2, 
-                                                'tickcolor': "white",
-                                                'tickfont': {'color': 'white'}
-                                            },
-                                            'bar': {'color': "darkred" if risk_score > 70 else "orange" if risk_score > 50 else "green"},
-                                            'steps': [
-                                                {'range': [0, 30], 'color': "rgba(0, 255, 0, 0.3)"},
-                                                {'range': [30, 60], 'color': "rgba(255, 255, 0, 0.3)"},
-                                                {'range': [60, 80], 'color': "rgba(255, 165, 0, 0.3)"},
-                                                {'range': [80, 100], 'color': "rgba(255, 0, 0, 0.3)"}
-                                            ],
-                                            'threshold': {
-                                                'line': {'color': "red", 'width': 4},
-                                                'thickness': 0.75,
-                                                'value': 85
-                                            }
-                                        }
-                                    ))
-                                    
-                                    gauge_fig.update_layout(
-                                        height=300,
-                                        template='plotly_dark',
-                                        paper_bgcolor='rgba(0,0,0,0)',
-                                        plot_bgcolor='rgba(0,0,0,0)'
-                                    )
-                                    
-                                    st.plotly_chart(gauge_fig, use_container_width=True)
-                                except Exception as gauge_error:
-                                    st.info(f"Risk gauge temporarily unavailable: {str(gauge_error)}")
+
+                                    # Determine risk level and color
+                                    if risk_score < 40:
+                                        risk_level = "Low Risk"
+                                        risk_color = "#10B981"
+                                    elif risk_score < 70:
+                                        risk_level = "Moderate Risk"
+                                        risk_color = "#F59E0B"
+                                    else:
+                                        risk_level = "High Risk"
+                                        risk_color = "#EF4444"
+
+                                    st.markdown(f"""
+                                    <div style="
+                                        background-color: var(--color-bg-secondary);
+                                        border: 1px solid var(--color-border-subtle);
+                                        border-radius: 8px;
+                                        padding: 24px;
+                                        height: 300px;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                    ">
+                                        <div style="margin-bottom: 24px;">
+                                            <h3 style="
+                                                font-family: 'Inter', sans-serif;
+                                                font-size: 18px;
+                                                font-weight: 600;
+                                                color: #FFFFFF;
+                                                margin: 0 0 8px 0;
+                                            ">Risk Assessment</h3>
+                                            <div style="
+                                                font-family: 'JetBrains Mono', monospace;
+                                                font-size: 48px;
+                                                font-weight: 600;
+                                                color: {risk_color};
+                                                line-height: 1.2;
+                                                margin-bottom: 4px;
+                                            ">{risk_score}<span style="font-size: 24px; color: var(--color-text-secondary);">/100</span></div>
+                                            <div style="
+                                                font-family: 'Inter', sans-serif;
+                                                font-size: 14px;
+                                                font-weight: 500;
+                                                color: var(--color-text-secondary);
+                                            ">{risk_level}</div>
+                                        </div>
+
+                                        <div style="margin-top: 16px;">
+                                            <div style="
+                                                background-color: var(--color-border-subtle);
+                                                height: 8px;
+                                                border-radius: 4px;
+                                                overflow: hidden;
+                                                position: relative;
+                                            ">
+                                                <div style="
+                                                    background-color: {risk_color};
+                                                    width: {risk_score}%;
+                                                    height: 100%;
+                                                    border-radius: 4px;
+                                                    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                                                "></div>
+                                            </div>
+                                            <div style="
+                                                display: flex;
+                                                justify-content: space-between;
+                                                margin-top: 8px;
+                                                font-family: 'Inter', sans-serif;
+                                                font-size: 11px;
+                                                color: var(--color-text-tertiary);
+                                            ">
+                                                <span>Low</span>
+                                                <span>Moderate</span>
+                                                <span>High</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+
+                                except Exception as risk_error:
+                                    st.info(f"Risk indicator temporarily unavailable: {str(risk_error)}")
                             
                             with col2:
                                 try:
@@ -964,16 +1371,42 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                             ])
                                             
                                             stress_fig.update_layout(
-                                                title="🔥 Stress Test Scenarios",
+                                                title={
+                                                    'text': "Stress Test Scenarios",
+                                                    'font': {
+                                                        'family': 'Inter, sans-serif',
+                                                        'size': 16,
+                                                        'weight': 600,
+                                                        'color': '#FFFFFF'
+                                                    }
+                                                },
+                                                font=dict(
+                                                    family='Inter, sans-serif',
+                                                    size=12,
+                                                    color='#A0A0A0'
+                                                ),
                                                 xaxis_title="Market Scenario",
                                                 yaxis_title="Return (%)",
                                                 template='plotly_dark',
                                                 height=300,
                                                 showlegend=False,
+                                                plot_bgcolor='#0F0F0F',
+                                                paper_bgcolor='#0F0F0F',
+                                                xaxis=dict(
+                                                    gridcolor='#242424',
+                                                    tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                                ),
                                                 yaxis=dict(
                                                     zeroline=True,
-                                                    zerolinewidth=2,
-                                                    zerolinecolor='rgba(128,128,128,0.5)'
+                                                    zerolinewidth=1,
+                                                    zerolinecolor='#404040',
+                                                    gridcolor='#242424',
+                                                    tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                                ),
+                                                hoverlabel=dict(
+                                                    bgcolor='#1A1A1A',
+                                                    bordercolor='#404040',
+                                                    font=dict(family='JetBrains Mono, monospace', size=12)
                                                 )
                                             )
                                             
@@ -997,11 +1430,30 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                         ])
                                         
                                         stress_fig.update_layout(
-                                            title="🔥 Stress Test Scenarios",
+                                            title={
+                                                'text': "Stress Test Scenarios",
+                                                'font': {'family': 'Inter, sans-serif', 'size': 16, 'weight': 600, 'color': '#FFFFFF'}
+                                            },
+                                            font=dict(family='Inter, sans-serif', size=12, color='#A0A0A0'),
                                             xaxis_title="Scenario",
                                             yaxis_title="Return (%)",
                                             template='plotly_dark',
-                                            height=300
+                                            height=300,
+                                            plot_bgcolor='#0F0F0F',
+                                            paper_bgcolor='#0F0F0F',
+                                            xaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                            ),
+                                            yaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                            ),
+                                            hoverlabel=dict(
+                                                bgcolor='#1A1A1A',
+                                                bordercolor='#404040',
+                                                font=dict(family='JetBrains Mono, monospace', size=12)
+                                            )
                                         )
                                         
                                         st.plotly_chart(stress_fig, use_container_width=True)
@@ -1012,7 +1464,7 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                         # Model Performance Breakdown
                         if show_components and 'individual_predictions' in prediction_result:
                             st.markdown("---")
-                            st.subheader("🔬 Model Performance Breakdown")
+                            st.subheader("Model Performance Breakdown")
                             
                             individual_preds = prediction_result['individual_predictions']
                             individual_confs = prediction_result['individual_confidences']
@@ -1050,16 +1502,42 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                         ))
                                     
                                     model_fig.update_layout(
-                                        title="🤖 Individual Model Predictions vs Ensemble",
+                                        title={
+                                            'text': "Individual Model Predictions vs Ensemble",
+                                            'font': {'family': 'Inter, sans-serif', 'size': 18, 'weight': 600, 'color': '#FFFFFF'}
+                                        },
+                                        font=dict(family='Inter, sans-serif', size=13, color='#A0A0A0'),
                                         xaxis_title="Date",
                                         yaxis_title="Price (₹)",
                                         template='plotly_dark',
                                         height=400,
-                                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                                        plot_bgcolor='#0F0F0F',
+                                        paper_bgcolor='#0F0F0F',
+                                        legend=dict(
+                                            orientation="h",
+                                            yanchor="bottom",
+                                            y=1.02,
+                                            xanchor="right",
+                                            x=1,
+                                            font=dict(family='Inter, sans-serif', size=12)
+                                        ),
+                                        xaxis=dict(
+                                            gridcolor='#242424',
+                                            tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                        ),
+                                        yaxis=dict(
+                                            gridcolor='#242424',
+                                            tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                        ),
+                                        hoverlabel=dict(
+                                            bgcolor='#1A1A1A',
+                                            bordercolor='#404040',
+                                            font=dict(family='JetBrains Mono, monospace', size=13)
+                                        )
                                     )
-                                    
+
                                     st.plotly_chart(model_fig, use_container_width=True)
-                                    
+
                                     # Model confidence comparison
                                     if individual_confs and len(individual_confs) > 0:
                                         conf_fig = go.Figure(data=[
@@ -1071,13 +1549,32 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                                                 textposition='auto'
                                             )
                                         ])
-                                        
+
                                         conf_fig.update_layout(
-                                            title="📊 Individual Model Confidence Levels",
+                                            title={
+                                                'text': "Individual Model Confidence Levels",
+                                                'font': {'family': 'Inter, sans-serif', 'size': 16, 'weight': 600, 'color': '#FFFFFF'}
+                                            },
+                                            font=dict(family='Inter, sans-serif', size=12, color='#A0A0A0'),
                                             xaxis_title="Model",
                                             yaxis_title="Confidence (%)",
                                             template='plotly_dark',
-                                            height=300
+                                            height=300,
+                                            plot_bgcolor='#0F0F0F',
+                                            paper_bgcolor='#0F0F0F',
+                                            xaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='Inter, sans-serif', size=11, color='#A0A0A0')
+                                            ),
+                                            yaxis=dict(
+                                                gridcolor='#242424',
+                                                tickfont=dict(family='JetBrains Mono, monospace', size=11, color='#A0A0A0')
+                                            ),
+                                            hoverlabel=dict(
+                                                bgcolor='#1A1A1A',
+                                                bordercolor='#404040',
+                                                font=dict(family='JetBrains Mono, monospace', size=12)
+                                            )
                                         )
                                         
                                         st.plotly_chart(conf_fig, use_container_width=True)
@@ -1087,58 +1584,58 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
 
                         # Trading Recommendations
                         st.markdown("---")
-                        st.subheader("💡 AI Trading Recommendations")
+                        st.subheader("AI Trading Recommendations")
 
                         recommendations = []
 
                         if confidence > 0.75:
-                            recommendations.append("🟢 **High Confidence Signal** - Strong prediction reliability")
+                            recommendations.append("**High Confidence Signal** - Strong prediction reliability")
                         elif confidence > 0.6:
-                            recommendations.append("🟡 **Moderate Confidence** - Consider position sizing")
+                            recommendations.append("**Moderate Confidence** - Consider position sizing")
                         else:
-                            recommendations.append("🔴 **Low Confidence** - Wait for better signals")
+                            recommendations.append("**Low Confidence** - Wait for better signals")
 
                         if risk_metrics:
                             risk_score = risk_metrics.get('risk_score', 50)
                             if risk_score < 40:
-                                recommendations.append("🟢 **Low Risk** - Suitable for conservative portfolios")
+                                recommendations.append("**Low Risk** - Suitable for conservative portfolios")
                             elif risk_score < 70:
-                                recommendations.append("🟡 **Moderate Risk** - Standard position sizing")
+                                recommendations.append("**Moderate Risk** - Standard position sizing")
                             else:
-                                recommendations.append("🔴 **High Risk** - Consider reduced position or stop-loss")
+                                recommendations.append("**High Risk** - Consider reduced position or stop-loss")
 
                         if abs(price_change) > 10:
-                            recommendations.append("⚡ **High Volatility Expected** - Monitor closely")
+                            recommendations.append("**High Volatility Expected** - Monitor closely")
 
                         if price_change > 5:
-                            recommendations.append("📈 **Bullish Outlook** - Potential upside opportunity")
+                            recommendations.append("**Bullish Outlook** - Potential upside opportunity")
                         elif price_change < -5:
-                            recommendations.append("📉 **Bearish Outlook** - Consider defensive strategies")
+                            recommendations.append("**Bearish Outlook** - Consider defensive strategies")
 
                         for rec in recommendations:
-                            st.markdown(rec)
+                            st.markdown(f"• {rec}")
 
-                        st.markdown("**📋 Suggested Actions:**")
+                        st.markdown("**Suggested Actions:**")
                         if confidence > 0.7 and (not risk_metrics or risk_metrics.get('risk_score', 50) < 60):
-                            st.markdown("• ✅ Consider entering position with appropriate sizing")
-                            st.markdown("• ✅ Set stop-loss orders for risk management")
-                            st.markdown("• ✅ Monitor for confirmation signals")
+                            st.markdown("• Consider entering position with appropriate sizing")
+                            st.markdown("• Set stop-loss orders for risk management")
+                            st.markdown("• Monitor for confirmation signals")
                         else:
-                            st.markdown("• ⏳ Wait for better entry opportunities")
-                            st.markdown("• ⏳ Monitor market conditions")
-                            st.markdown("• ⏳ Consider paper trading to test strategy")
+                            st.markdown("• Wait for better entry opportunities")
+                            st.markdown("• Monitor market conditions")
+                            st.markdown("• Consider paper trading to test strategy")
 
-                        st.markdown("• 📊 Review analysis weekly")
-                        st.markdown("• 📈 Track actual vs predicted performance")
+                        st.markdown("• Review analysis weekly")
+                        st.markdown("• Track actual vs predicted performance")
 
                         # Export Results
                         st.markdown("---")
-                        st.subheader("📥 Export Analysis Results")
+                        st.subheader("Export Analysis Results")
 
                         import re
                         import json
 
-                        recommendations_str = '; '.join([re.sub(r"^[🟢🟡🔴⚡📈📉 ]+", "", rec) for rec in recommendations])
+                        recommendations_str = '; '.join([rec.replace("**", "").strip() for rec in recommendations])
 
                         export_data = {
                             'Analysis Date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -1160,7 +1657,7 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                         col1, col2 = st.columns(2)
                         with col1:
                             st.download_button(
-                                label="📄 Download Analysis Report (CSV)",
+                                label="Download Analysis Report (CSV)",
                                 data=csv_data,
                                 file_name=f"AI_Analysis_{selected_stock}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                                 mime="text/csv"
@@ -1180,20 +1677,20 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                             }
                             json_str = json.dumps(json_data, indent=2, default=str)
                             st.download_button(
-                                label="📊 Download Full Data (JSON)",
+                                label="Download Full Data (JSON)",
                                 data=json_str,
                                 file_name=f"AI_Analysis_Full_{selected_stock}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                                 mime="application/json"
                             )
 
                         st.markdown("---")
-                        st.warning("⚠️ **Important Disclaimer:** This analysis is for educational purposes only and should not be considered as financial advice. Always consult with qualified financial professionals before making investment decisions.")
+                        st.warning("**Important Disclaimer:** This analysis is for educational purposes only and should not be considered as financial advice. Always consult with qualified financial professionals before making investment decisions.")
 
             except Exception as e:
-                st.error(f"❌ Analysis failed: {str(e)}")
-                st.info("🔄 Please try again or contact support if the issue persists.")
+                st.error(f"Analysis failed: {str(e)}")
+                st.info("Please try again or contact support if the issue persists.")
 
-                with st.expander("🔧 Troubleshooting Information"):
+                with st.expander("Troubleshooting Information"):
                     st.write("**Error Details:**")
                     st.code(str(e))
 
@@ -1209,13 +1706,13 @@ elif selected_nav == "🤖 ML Predictions" and ENHANCED_FEATURES:
                     st.write(f"• Selected Stock: {selected_stock}")
                     st.write(f"• Prediction Steps: {prediction_steps}")
 
-elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session_state.logged_in:
-    st.title("⚙️ User Settings & Preferences")
+elif selected_nav == "User Settings" and ENHANCED_FEATURES and st.session_state.logged_in:
+    st.title("User Settings & Preferences")
 
     user = st.session_state.user
 
     # User Profile Section
-    st.subheader("👤 Profile Information")
+    st.subheader("Profile Information")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -1227,7 +1724,7 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
         st.text_input("Last Login", value=user.get('last_login', 'Never'), disabled=True)
 
     # Preferences Section
-    st.subheader("🎨 Preferences")
+    st.subheader("Preferences")
 
     with st.form("preferences_form"):
         col1, col2 = st.columns(2)
@@ -1256,7 +1753,7 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
                 value=True
             )
 
-        if st.form_submit_button("💾 Save Preferences", use_container_width=True):
+        if st.form_submit_button("Save Preferences", use_container_width=True):
             success = st.session_state.auth_handler.update_user_preferences(
                 user['id'],
                 theme=theme_preference.lower(),
@@ -1265,17 +1762,17 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
             )
 
             if success:
-                st.success("✅ Preferences updated successfully!")
+                st.success("Preferences updated successfully")
                 st.session_state.user.update({
                     'theme': theme_preference.lower(),
                     'default_mode': default_mode,
                     'email_notifications': email_notifications
                 })
             else:
-                st.error("❌ Failed to update preferences")
+                st.error("Failed to update preferences")
 
     # Portfolio Management Section
-    st.subheader("💼 Portfolio Management")
+    st.subheader("Portfolio Management")
 
     user_portfolio = st.session_state.auth_handler.get_user_portfolio(user['id'])
 
@@ -1288,14 +1785,14 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
             use_container_width=True
         )
 
-        if st.button("🗑️ Clear All Portfolio Data", type="secondary"):
+        if st.button("Clear All Portfolio Data", type="secondary"):
             if st.checkbox("I understand this will delete all my portfolio data"):
                 st.warning("Clear portfolio functionality would be implemented here")
     else:
-        st.info("📊 Your portfolio is empty. Add some stocks from the Portfolio Tracker page!")
+        st.info("Your portfolio is empty. Add some stocks from the Portfolio Tracker page")
 
     # Watchlist Management
-    st.subheader("👀 Watchlist Management")
+    st.subheader("Watchlist Management")
 
     user_watchlist = st.session_state.auth_handler.get_user_watchlist(user['id'])
 
@@ -1305,30 +1802,30 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
         for item in user_watchlist:
             col1, col2, col3 = st.columns([3, 2, 1])
             with col1:
-                st.write(f"📈 {INDIAN_STOCKS.get(item['symbol'], item['symbol'])}")
+                st.write(f"{INDIAN_STOCKS.get(item['symbol'], item['symbol'])}")
             with col2:
                 if item['alert_price']:
-                    st.write(f"🔔 Alert: ₹{item['alert_price']}")
+                    st.write(f"Alert: ₹{item['alert_price']}")
                 else:
                     st.write("No alert set")
             with col3:
-                if st.button("❌", key=f"remove_{item['id']}"):
+                if st.button("Remove", key=f"remove_{item['id']}"):
                     st.rerun()
     else:
-        st.info("👀 Your watchlist is empty. Add stocks from the Stock Analysis page!")
+        st.info("Your watchlist is empty. Add stocks from the Stock Analysis page")
 
     # Data Export Section
-    st.subheader("📥 Data Export")
+    st.subheader("Data Export")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("📊 Export Portfolio", use_container_width=True):
+        if st.button("Export Portfolio", use_container_width=True):
             if user_portfolio:
                 portfolio_df = pd.DataFrame(user_portfolio)
                 csv = portfolio_df.to_csv(index=False)
                 st.download_button(
-                    label="📥 Download Portfolio CSV",
+                    label="Download Portfolio CSV",
                     data=csv,
                     file_name=f"portfolio_{user['username']}_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv"
@@ -1337,12 +1834,12 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
                 st.warning("No portfolio data to export")
 
     with col2:
-        if st.button("👀 Export Watchlist", use_container_width=True):
+        if st.button("Export Watchlist", use_container_width=True):
             if user_watchlist:
                 watchlist_df = pd.DataFrame(user_watchlist)
                 csv = watchlist_df.to_csv(index=False)
                 st.download_button(
-                    label="📥 Download Watchlist CSV",
+                    label="Download Watchlist CSV",
                     data=csv,
                     file_name=f"watchlist_{user['username']}_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv"
@@ -1351,9 +1848,9 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
                 st.warning("No watchlist data to export")
 
     # Account Management section
-    st.subheader("🔐 Account Management")
+    st.subheader("Account Management")
 
-    with st.expander("🔑 Change Password", expanded=False):
+    with st.expander("Change Password", expanded=False):
         with st.form("change_password_form"):
             current_password = st.text_input("Current Password", type="password")
             new_password = st.text_input("New Password", type="password")
@@ -1362,49 +1859,49 @@ elif selected_nav == "⚙️ User Settings" and ENHANCED_FEATURES and st.session
             if new_password:
                 st.markdown(create_password_strength_indicator(new_password), unsafe_allow_html=True)
 
-            if st.form_submit_button("🔄 Change Password"):
+            if st.form_submit_button("Change Password"):
                 if not all([current_password, new_password, confirm_new_password]):
-                    st.error("❌ Please fill in all fields")
+                    st.error("Please fill in all fields")
                 elif new_password != confirm_new_password:
-                    st.error("❌ New passwords don't match")
+                    st.error("New passwords don't match")
                 else:
                     password_valid, password_msg = validate_password(new_password)
                     if not password_valid:
-                        st.error(f"❌ {password_msg}")
+                        st.error(f"{password_msg}")
                     else:
-                        st.info("🔄 Password change functionality would be implemented here")
+                        st.info("Password change functionality would be implemented here")
 
-    with st.expander("⚠️ Danger Zone", expanded=False):
+    with st.expander("Danger Zone", expanded=False):
         st.markdown("### Delete Account")
-        st.warning("⚠️ This action cannot be undone. All your data will be permanently deleted.")
+        st.warning("This action cannot be undone. All your data will be permanently deleted.")
 
         delete_confirmation = st.text_input(
             "Type 'DELETE' to confirm account deletion:",
             placeholder="Type DELETE here"
         )
 
-        if st.button("🗑️ Delete Account", type="secondary", disabled=delete_confirmation != "DELETE"):
-            st.error("🚨 Account deletion functionality would be implemented here with proper confirmation")
+        if st.button("Delete Account", type="secondary", disabled=delete_confirmation != "DELETE"):
+            st.error("Account deletion functionality would be implemented here with proper confirmation")
 
 else:
     if not ENHANCED_FEATURES:
-        st.title("📈 Indian Stock Trading Dashboard")
-        st.warning("⚠️ Enhanced features (Authentication & ML) are not available.")
-        st.info("💡 To enable full functionality, install required packages:")
+        st.title("Indian Stock Trading Dashboard")
+        st.warning("Enhanced features (Authentication & ML) are not available.")
+        st.info("To enable full functionality, install required packages:")
         st.code("pip install tensorflow-cpu scikit-learn statsmodels bcrypt validators")
 
         st.markdown("---")
         st.markdown("### Available Features:")
-        st.markdown("✅ Market Overview")
-        st.markdown("✅ Stock Analysis")
-        st.markdown("✅ Portfolio Tracker")
-        st.markdown("✅ News & Sentiment")
-        st.markdown("❌ User Authentication")
-        st.markdown("❌ ML Predictions")
-        st.markdown("❌ Personal Settings")
+        st.markdown("• Market Overview")
+        st.markdown("• Stock Analysis")
+        st.markdown("• Portfolio Tracker")
+        st.markdown("• News & Sentiment")
+        st.markdown("• User Authentication - Not Available")
+        st.markdown("• ML Predictions - Not Available")
+        st.markdown("• Personal Settings - Not Available")
 
-    elif selected_nav not in ["📊 Market Overview", "📈 Stock Analysis", "💼 Portfolio Tracker", "📰 News & Sentiment"]:
-        st.title("🔒 Authentication Required")
+    elif selected_nav not in ["Market Overview", "Stock Analysis", "Portfolio Tracker", "News & Sentiment"]:
+        st.title("Authentication Required")
         st.info("Please login to access this feature.")
 
         with st.container():
@@ -1421,17 +1918,17 @@ else:
                             if user_id:
                                 st.session_state.logged_in = True
                                 st.session_state.user = st.session_state.auth_handler.get_user_info(user_id)
-                                st.success("✅ Login successful!")
+                                st.success("Login successful")
                                 st.rerun()
                             else:
-                                st.error(f"❌ {message}")
+                                st.error(f"{message}")
 
 # Footer with additional information
 st.markdown("---")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown("### 🚀 Features")
+    st.markdown("### Features")
     st.markdown("- Real-time market data")
     st.markdown("- Technical analysis")
     st.markdown("- News sentiment analysis")
@@ -1440,14 +1937,14 @@ with col1:
         st.markdown("- User authentication")
 
 with col2:
-    st.markdown("### 📊 Data Sources")
+    st.markdown("### Data Sources")
     st.markdown("- Yahoo Finance")
     st.markdown("- NSE/BSE APIs")
     st.markdown("- News aggregators")
     st.markdown("- Technical indicators")
 
 with col3:
-    st.markdown("### ⚠️ Disclaimer")
+    st.markdown("### Disclaimer")
     st.markdown("This application is for educational purposes only.")
     st.markdown("Not financial advice.")
     st.markdown("Please consult qualified advisors.")
@@ -1455,11 +1952,11 @@ with col3:
 # Performance metrics (if user is logged in)
 if ENHANCED_FEATURES and st.session_state.logged_in:
     with st.sidebar:
-        if st.button("📊 Performance Metrics"):
+        if st.button("Performance Metrics"):
             st.session_state.show_performance = True
 
         if st.session_state.get('show_performance', False):
-            st.markdown("### 📈 Your Trading Stats")
+            st.markdown("### Your Trading Stats")
             st.metric("Portfolio Return", "+12.5%", "+2.3%")
             st.metric("Win Rate", "68%", "+5%")
             st.metric("Predictions Used", "23", "+3")
