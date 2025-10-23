@@ -356,9 +356,9 @@ st.markdown("""
         border-radius: 8px;
     }
 
-    /* Sidebar header spacing: tighten below main title */
-    section[data-testid="stSidebar"] h1 {
-        margin-bottom: 8px !important;
+    /* Sidebar header spacing: tighten below custom title */
+    .sidebar-title h1 {
+        margin: 0 0 8px 0 !important;
     }
     section[data-testid="stSidebar"] .stMarkdown p {
         margin-top: 0;
@@ -510,7 +510,8 @@ def create_password_strength_indicator(password):
 
 # Sidebar Content
 with st.sidebar:
-    st.title("Indian Stock Dashboard")
+    # Custom title block to eliminate default spacing
+    st.markdown('<div class="sidebar-title"><h1 style="margin:0;">Indian Stock Dashboard</h1></div>', unsafe_allow_html=True)
 
     # Authentication Section
     if ENHANCED_FEATURES:
@@ -626,8 +627,6 @@ with st.sidebar:
                     st.session_state.user = None
                     st.rerun()
 
-    st.markdown("---")
-
     # Removed global Trading Mode (Beginner/Pro/Expert). Pages now show detailed views by default.
     st.markdown("---")
 
@@ -662,17 +661,7 @@ with st.sidebar:
     except Exception:
         st.metric("NIFTY 50", "₹25,400", "+0.45%")
 
-    # Feature availability indicator
-    st.markdown("---")
-    st.markdown("### Features Available")
-    if ENHANCED_FEATURES:
-        st.markdown("• User Authentication")
-        st.markdown("• ML-Powered Predictions")
-        st.markdown("• Personal Portfolio")
-        st.markdown("• Advanced Analytics")
-    else:
-        st.markdown("• Basic features only")
-        st.markdown("• Install ML packages for full experience")
+    # Features Available section removed to streamline the sidebar
 
     # Footer
     st.markdown("---")
