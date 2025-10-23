@@ -109,163 +109,177 @@ def create_password_strength_indicator(password):
 
 # Sidebar Content
 with st.sidebar:
-    # Custom title block to eliminate default spacing
-    st.markdown('<div class="sidebar-title"><h1 style="margin:0;">Indian Stock Dashboard</h1></div>', unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+            .sidebar-title h1 {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .auth-container {
+                background-color: #1A1A1A;
+                padding: 10px 14px;
+                border-radius: 8px;
+                border: 1px solid #2A2A2A;
+                margin-top: 8px;
+            }
+            .user-info {
+                padding: 12px 14px;
+                background-color: #1A1A1A;
+                border: 1px solid #2A2A2A;
+                border-radius: 8px;
+                margin: 8px 0;
+            }
+            .block-container {
+                padding-top: 0rem !important;
+            }
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 20px;
+                margin-bottom: 4px;
+            }
+            .stTabs [data-baseweb="tab"] {
+                font-weight: 600;
+                color: #aaa;
+            }
+            .stTabs [data-baseweb="tab"][aria-selected="true"] {
+                color: #ef4444;
+                border-bottom: 2px solid #ef4444;
+            }
+            hr {
+                margin: 12px 0;
+                border-color: #333;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    # Authentication Section
+    # Sidebar Title
+    st.markdown('<div class="sidebar-title"><h1>Indian Stock Dashboard</h1></div>', unsafe_allow_html=True)
+
+    # --- Authentication Section ---
     if ENHANCED_FEATURES:
         if not st.session_state.logged_in:
-            # Header first to avoid extra top padding block
             st.markdown("### User Authentication")
             st.markdown('<div class="auth-container">', unsafe_allow_html=True)
 
-            auth_tab1, auth_tab2 = st.tabs(["Login", "Register"])
+            tabs = st.tabs(["Login", "Register"])
 
-            with auth_tab1:
-                with st.form("login_form", clear_on_submit=False):
-                    st.markdown("#### Welcome Back!")
-                    username = st.text_input("Username", placeholder="Enter your username")
-                    password = st.text_input("Password", type="password", placeholder="Enter your password")
+            # --- LOGIN TAB ---
+            with tabs[0]:
+                username = st.text_input("Username", placeholder="Enter your username", key="login_user")
+                password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_pass")
 
-                    col1, col2 = st.columns([2, 1])
-                    with col1:
-                        remember_me = st.checkbox("Remember me", value=True)
-                    with col2:
-                        st.markdown('<small><a href="#" style="color: var(--color-info); text-transform: none;">Forgot?</a></small>', unsafe_allow_html=True)
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    remember_me = st.checkbox("Remember me", value=True, key="remember_me")
+                with col2:
+                    st.markdown('<small><a href="#" style="color:#3b82f6;">Forgot?</a></small>', unsafe_allow_html=True)
 
-                    login_submit = st.form_submit_button("Login", use_container_width=True)
-
-                    if login_submit:
-                        if username and password:
-                            with st.spinner("Authenticating..."):
-                                user_id, message = st.session_state.auth_handler.verify_user(username, password)
-                                if user_id:
-                                    st.session_state.logged_in = True
-                                    st.session_state.user = st.session_state.auth_handler.get_user_info(user_id)
-                                    st.markdown('<div class="success-message">Login successful</div>', unsafe_allow_html=True)
-                                    st.rerun()
-                                else:
-                                    st.markdown(f'<div class="error-message">{message}</div>', unsafe_allow_html=True)
-                        else:
-                            st.markdown('<div class="error-message">Please fill in all fields</div>', unsafe_allow_html=True)
-
-            with auth_tab2:
-                with st.form("register_form", clear_on_submit=False):
-                    st.markdown("#### Create Account")
-                    new_username = st.text_input("Username", placeholder="Choose a username")
-                    new_email = st.text_input("Email", placeholder="your.email@example.com")
-                    new_password = st.text_input("Password", type="password", placeholder="Create a strong password")
-                    confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm your password")
-
-                    # Password strength indicator
-                    if new_password:
-                        st.markdown(create_password_strength_indicator(new_password), unsafe_allow_html=True)
-
-                    agree_terms = st.checkbox("I agree to the Terms of Service and Privacy Policy")
-
-                    register_submit = st.form_submit_button("Create Account", use_container_width=True)
-
-                    if register_submit:
-                        if not agree_terms:
-                            st.markdown('<div class="error-message">Please agree to the terms</div>', unsafe_allow_html=True)
-                        elif new_username and new_email and new_password and confirm_password:
-                            # Validate inputs
-                            username_valid, username_msg = validate_username(new_username)
-                            email_valid, email_msg = validate_email(new_email)
-                            password_valid, password_msg = validate_password(new_password, confirm_password)
-
-                            if not username_valid:
-                                st.markdown(f'<div class="error-message">{username_msg}</div>', unsafe_allow_html=True)
-                            elif not email_valid:
-                                st.markdown(f'<div class="error-message">{email_msg}</div>', unsafe_allow_html=True)
-                            elif not password_valid:
-                                st.markdown(f'<div class="error-message">{password_msg}</div>', unsafe_allow_html=True)
+                if st.button("Login", use_container_width=True, key="login_btn"):
+                    if username and password:
+                        with st.spinner("Authenticating..."):
+                            user_id, message = st.session_state.auth_handler.verify_user(username, password)
+                            if user_id:
+                                st.session_state.logged_in = True
+                                st.session_state.user = st.session_state.auth_handler.get_user_info(user_id)
+                                st.rerun()
                             else:
-                                with st.spinner("Creating account..."):
-                                    success, message = st.session_state.auth_handler.register_user(
-                                        new_username, new_email, new_password
-                                    )
-                                    if success:
-                                        st.markdown('<div class="success-message">Registration successful! Please login.</div>', unsafe_allow_html=True)
-                                        st.balloons()
-                                    else:
-                                        st.markdown(f'<div class="error-message">{message}</div>', unsafe_allow_html=True)
+                                st.error(message)
+                    else:
+                        st.error("Please fill in all fields")
+
+            # --- REGISTER TAB ---
+            with tabs[1]:
+                new_username = st.text_input("Username", placeholder="Choose a username", key="reg_user")
+                new_email = st.text_input("Email", placeholder="your.email@example.com", key="reg_email")
+                new_password = st.text_input("Password", type="password", placeholder="Create a strong password", key="reg_pass")
+                confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm password", key="reg_conf")
+
+                if new_password:
+                    st.markdown(create_password_strength_indicator(new_password), unsafe_allow_html=True)
+
+                agree_terms = st.checkbox("I agree to the Terms of Service", key="terms_chk")
+
+                if st.button("Create Account", use_container_width=True, key="register_btn"):
+                    if not agree_terms:
+                        st.error("You must agree to the terms.")
+                    elif not (new_username and new_email and new_password and confirm_password):
+                        st.error("Please fill all fields.")
+                    else:
+                        username_valid, username_msg = validate_username(new_username)
+                        email_valid, email_msg = validate_email(new_email)
+                        password_valid, password_msg = validate_password(new_password, confirm_password)
+                        if not username_valid:
+                            st.error(username_msg)
+                        elif not email_valid:
+                            st.error(email_msg)
+                        elif not password_valid:
+                            st.error(password_msg)
                         else:
-                            st.markdown('<div class="error-message">Please fill in all fields</div>', unsafe_allow_html=True)
+                            with st.spinner("Creating account..."):
+                                success, msg = st.session_state.auth_handler.register_user(new_username, new_email, new_password)
+                                if success:
+                                    st.success("Registration successful! Please log in.")
+                                    st.balloons()
+                                else:
+                                    st.error(msg)
 
             st.markdown('</div>', unsafe_allow_html=True)
 
         else:
-            # User is logged in
+            # --- LOGGED-IN VIEW ---
             user = st.session_state.user
             st.markdown(f"""
-            <div class="user-info">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <h4 style="margin: 0;">Welcome, {user['username']}</h4>
-                        <small>{user['email']}</small><br>
-                        <small>Last login: {user.get('last_login', 'Never')}</small>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="background-color: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 15px; font-size: 11px;">
+                <div class="user-info">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <h4 style="margin:0;">{user['username']}</h4>
+                            <small>{user['email']}</small><br>
+                            <small>Last login: {user.get('last_login','Never')}</small>
+                        </div>
+                        <div style="background-color:#333;padding:5px 10px;border-radius:12px;font-size:11px;">
                             Premium User
                         </div>
                     </div>
                 </div>
-            </div>
             """, unsafe_allow_html=True)
 
-            # User actions
-            col1, col2 = st.columns(2)
-            with col1:
+            c1, c2 = st.columns(2)
+            with c1:
                 if st.button("Profile", use_container_width=True):
                     st.session_state.show_profile = True
-            with col2:
+            with c2:
                 if st.button("Logout", use_container_width=True):
                     st.session_state.logged_in = False
                     st.session_state.user = None
                     st.rerun()
 
-    # Removed global Trading Mode (Beginner/Pro/Expert). Pages now show detailed views by default.
-    st.markdown("---")
-
-    # Navigation
+    # --- Navigation Section ---
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("### Navigation")
     nav_options = ["Live Market", "Market Overview", "Stock Analysis", "Portfolio Tracker", "News & Sentiment"]
-
     if ENHANCED_FEATURES and st.session_state.logged_in:
         nav_options.extend(["ML Predictions", "User Settings"])
 
-    selected_nav = st.radio(
-        "Choose a section:",
-        nav_options,
-        label_visibility="collapsed"
-    )
+    selected_nav = st.radio("Select a page", nav_options, label_visibility="collapsed", key="sidebar_nav")
 
-    st.markdown("---")
-
-    # Quick Stats
+    # --- Quick Stats ---
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("### Quick Market Stats")
     try:
         nifty = yf.download("^NSEI", period="1d", interval="1m")
         if not nifty.empty:
             current_nifty = nifty['Close'][-1]
             nifty_change = ((current_nifty - nifty['Close'][0]) / nifty['Close'][0]) * 100
-
-            st.metric(
-                "NIFTY 50",
-                f"₹{current_nifty:.2f}",
-                f"{nifty_change:+.2f}%"
-            )
+            st.metric("NIFTY 50", f"₹{current_nifty:.2f}", f"{nifty_change:+.2f}%")
     except Exception:
         st.metric("NIFTY 50", "₹25,400", "+0.45%")
 
-    # Features Available section removed to streamline the sidebar
-
-    # Footer
-    st.markdown("---")
+    # --- Footer ---
+    st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown(
-        '<p style="text-align: center; color: #666; font-size: 12px;">© 2024 Indian Stock Dashboard<br>Enhanced with AI</p>',
+        '<p style="text-align:center;color:#666;font-size:12px;">© 2024 Indian Stock Dashboard<br>Enhanced with AI</p>',
         unsafe_allow_html=True
     )
 
@@ -1537,16 +1551,5 @@ with col3:
 
 # Performance metrics (if user is logged in)
 if ENHANCED_FEATURES and st.session_state.logged_in:
-    with st.sidebar:
-        if st.button("Performance Metrics"):
-            st.session_state.show_performance = True
-
-        if st.session_state.get('show_performance', False):
-            st.markdown("### Your Trading Stats")
-            st.metric("Portfolio Return", "+12.5%", "+2.3%")
-            st.metric("Win Rate", "68%", "+5%")
-            st.metric("Predictions Used", "23", "+3")
-
-            if st.button("❌ Close"):
-                st.session_state.show_performance = False
-                st.rerun()
+    # Performance metrics are available in the main sidebar via the Live Market page or other sections as needed.
+    pass
