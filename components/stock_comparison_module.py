@@ -247,12 +247,14 @@ def create_correlation_heatmap(data: dict) -> go.Figure:
         textfont=dict(color='#FFFAFF', family='JetBrains Mono, monospace', size=11),
         hovertemplate='%{y} vs %{x}<br>Correlation: %{z:.3f}<extra></extra>',
         colorbar=dict(
-            title='Correlation',
-            titleside='right',
+            title=dict(
+                text='Correlation',
+                side='right',
+                font=dict(color='#C8C4C9', size=12)
+            ),
             tickmode='linear',
             tick0=-1,
             dtick=0.5,
-            titlefont=dict(color='#C8C4C9', size=12),
             tickfont=dict(color='#9A969B', size=10)
         )
     ))
