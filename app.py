@@ -955,7 +955,7 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                                 color: {risk_color};
                                                 line-height: 1.2;
                                                 margin-bottom: 4px;
-                                            ">{risk_score}<span style="font-size: 24px; color: var(--color-text-secondary);">/100</span></div>
+                                            ">{risk_score}<span style='font-size: 24px; color: var(--color-text-secondary);'>/100</span></div>
                                             <div style="
                                                 font-family: 'Inter', sans-serif;
                                                 font-size: 14px;
