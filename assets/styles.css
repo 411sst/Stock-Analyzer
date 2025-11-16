@@ -145,12 +145,27 @@ p {
     border: 1px solid var(--color-border-subtle);
 }
 
+.auth-container:empty {
+    display: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+/* Only show user-info when it has content */
 .user-info {
     padding: 16px;
     background-color: var(--color-bg-secondary);
     border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-lg);
     margin: 8px 0 16px 0;
+}
+
+.user-info:empty {
+    display: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
 }
 
 /* ===================================
@@ -510,6 +525,23 @@ hr {
 
 .block-container {
     padding-top: 0rem !important;
+}
+
+/* Hide Streamlit header/toolbar to prevent black bar on scroll */
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+#MainMenu {
+    visibility: hidden !important;
+}
+
+.stDeployButton {
+    display: none !important;
+}
+
+footer {
+    visibility: hidden !important;
 }
 
 /* Radio Buttons */
