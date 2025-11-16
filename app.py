@@ -270,7 +270,7 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
         st.info("💡 This module showcases **ARIMA**, **LSTM Neural Networks**, **Ensemble Learning**, and **Value-at-Risk (VaR)** techniques from the course syllabus.")
 
         # Stock selection
-        col1, col2, col3 = st.columns([2, 1, 1])
+        col1, col2 = st.columns([2, 1])
         with col1:
             selected_stock = st.selectbox(
                 "Select Stock for AI Analysis:",
@@ -283,13 +283,6 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                 "Prediction Period:",
                 ["1 Week", "2 Weeks", "1 Month"],
                 index=0
-            )
-
-        with col3:
-            analysis_depth = st.selectbox(
-                "Analysis Level:",
-                ["Basic", "Advanced", "Professional"],
-                index=1
             )
 
         steps_map = {"1 Week": 7, "2 Weeks": 14, "1 Month": 30}
@@ -315,7 +308,7 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                 st.markdown("**Display Options**")
                 show_components = st.checkbox("Show Model Components", value=False)
                 show_risk_metrics = st.checkbox("Show Risk Dashboard", value=True)
-                show_performance = st.checkbox("Show Performance Metrics", value=analysis_depth != "Basic")
+                show_performance = st.checkbox("Show Performance Metrics", value=True)
 
         # Quick Market Context
         with st.container():
