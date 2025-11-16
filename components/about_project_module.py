@@ -11,14 +11,36 @@ def about_project_page():
 
     # Header
     st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 12px; margin-bottom: 30px;">
-            <h1 style="color: white; margin: 0; font-size: 2.5em;">🎓 About This Project</h1>
-            <p style="color: #f0f0f0; font-size: 1.2em; margin-top: 10px;">Advanced Data Analytics Course Project</p>
+        <div style="
+            background-color: var(--color-bg-secondary);
+            border: 1px solid var(--color-border-subtle);
+            border-left: 4px solid var(--color-accent-primary);
+            padding: 32px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+        ">
+            <h1 style="
+                color: var(--color-text-primary);
+                font-family: var(--font-ui);
+                font-size: 32px;
+                font-weight: 700;
+                margin: 0 0 8px 0;
+                letter-spacing: -0.02em;
+            ">About This Project</h1>
+            <p style="
+                color: var(--color-text-secondary);
+                font-size: 14px;
+                margin: 0;
+                font-weight: 600;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                font-family: var(--font-ui);
+            ">Advanced Data Analytics Course Project</p>
         </div>
     """, unsafe_allow_html=True)
 
     # Project Overview
-    st.header("📋 Project Overview")
+    st.header("Project Overview")
     st.markdown("""
     This **AI-Powered Stock Analytics Platform** is an academic project developed for the
     **Advanced Data Analytics** course. It demonstrates the practical application of data science,
@@ -27,56 +49,56 @@ def about_project_page():
     """)
 
     # Course Alignment
-    st.header("📚 Course Syllabus Alignment")
+    st.header("Course Syllabus Alignment")
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.subheader("Module 1: Data Science Fundamentals")
         st.markdown("""
-        **✅ Implemented Concepts:**
+        **Implemented Concepts:**
         - **Descriptive Analysis**: Summary statistics, distributions, trends
         - **Correlation Analysis**: Price-volume, cross-asset correlations
         - **Data Visualization**: Interactive charts, dashboards
         - **Statistical Measures**: Mean, median, std deviation, quartiles
 
-        **📍 Location**: Market Overview, Stock Analysis pages
+        **Location**: Market Overview, Stock Analysis pages
         """)
 
         st.subheader("Module 3 & 4: Advanced Techniques")
         st.markdown("""
-        **✅ Implemented Concepts:**
+        **Implemented Concepts:**
         - **Ensemble Methods**: Combining multiple ML models
         - **Risk Analytics**: VaR, volatility, stress testing
         - **NLP & Sentiment**: News sentiment analysis
         - **Feature Selection**: Technical indicators, importance ranking
 
-        **📍 Location**: All modules
+        **Location**: All modules
         """)
 
     with col2:
         st.subheader("Module 2: Predictive Analytics")
         st.markdown("""
-        **✅ Implemented Concepts:**
+        **Implemented Concepts:**
         - **Data Preprocessing**: Cleaning, imputation, transformation
         - **Regression Models**: Linear, multiple, non-linear regression
         - **Time Series Analysis**: ARIMA, exponential smoothing
         - **Neural Networks**: LSTM for time series forecasting
         - **Stationarity Testing**: ADF test, differencing
 
-        **📍 Location**: ML Predictions page
+        **Location**: ML Predictions page
         """)
 
     st.divider()
 
     # Technical Implementation
-    st.header("🔬 Technical Implementation")
+    st.header("Technical Implementation")
 
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Data Pipeline",
-        "🤖 ML Models",
-        "📈 Analytics",
-        "🎨 Visualizations"
+        "Data Pipeline",
+        "ML Models",
+        "Analytics",
+        "Visualizations"
     ])
 
     with tab1:
@@ -258,7 +280,7 @@ def about_project_page():
     st.divider()
 
     # Key Results
-    st.header("📊 Key Results & Performance")
+    st.header("Key Results & Performance")
 
     col1, col2, col3 = st.columns(3)
 
@@ -307,7 +329,7 @@ def about_project_page():
     st.divider()
 
     # Insights
-    st.header("💡 Key Insights & Learnings")
+    st.header("Key Insights & Learnings")
 
     insights_col1, insights_col2 = st.columns(2)
 
@@ -334,29 +356,29 @@ def about_project_page():
     st.divider()
 
     # Technologies
-    st.header("🛠️ Technologies & Tools")
+    st.header("Technologies & Tools")
 
     st.markdown("""
-    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;">
-        <span style="background-color: #1e3a8a; padding: 8px 16px; border-radius: 20px; font-weight: 600;">Python 3.12</span>
-        <span style="background-color: #7c3aed; padding: 8px 16px; border-radius: 20px; font-weight: 600;">Pandas</span>
-        <span style="background-color: #db2777; padding: 8px 16px; border-radius: 20px; font-weight: 600;">NumPy</span>
-        <span style="background-color: #ea580c; padding: 8px 16px; border-radius: 20px; font-weight: 600;">Scikit-learn</span>
-        <span style="background-color: #ca8a04; padding: 8px 16px; border-radius: 20px; font-weight: 600;">TensorFlow</span>
-        <span style="background-color: #16a34a; padding: 8px 16px; border-radius: 20px; font-weight: 600;">Statsmodels</span>
-        <span style="background-color: #0891b2; padding: 8px 16px; border-radius: 20px; font-weight: 600;">Plotly</span>
-        <span style="background-color: #e11d48; padding: 8px 16px; border-radius: 20px; font-weight: 600;">Streamlit</span>
-        <span style="background-color: #4f46e5; padding: 8px 16px; border-radius: 20px; font-weight: 600;">PostgreSQL</span>
-        <span style="background-color: #0284c7; padding: 8px 16px; border-radius: 20px; font-weight: 600;">yfinance</span>
-        <span style="background-color: #9333ea; padding: 8px 16px; border-radius: 20px; font-weight: 600;">TextBlob</span>
-        <span style="background-color: #dc2626; padding: 8px 16px; border-radius: 20px; font-weight: 600;">BeautifulSoup</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px;">
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">Python 3.12</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">Pandas</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">NumPy</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">Scikit-learn</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">TensorFlow</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">Statsmodels</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">Plotly</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">Streamlit</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">PostgreSQL</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">yfinance</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">TextBlob</span>
+        <span style="background-color: var(--color-bg-tertiary); padding: 6px 14px; border-radius: 4px; font-weight: 500; font-size: 12px; color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); font-family: var(--font-ui); letter-spacing: 0.02em;">BeautifulSoup</span>
     </div>
     """, unsafe_allow_html=True)
 
     st.divider()
 
     # Dataset Information
-    st.header("📂 Dataset Information")
+    st.header("Dataset Information")
 
     col1, col2 = st.columns(2)
 
@@ -386,7 +408,7 @@ def about_project_page():
     st.divider()
 
     # Future Scope
-    st.header("🔮 Future Enhancements (Potential Extensions)")
+    st.header("Future Enhancements (Potential Extensions)")
 
     st.markdown("""
     ### Causal Inference Integration (Modules 3 & 4 of Syllabus)
@@ -422,40 +444,65 @@ def about_project_page():
     st.divider()
 
     # Contact & Links
-    st.header("🔗 Links & Resources")
+    st.header("Links & Resources")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.markdown("""
-        **📂 Project Repository**
+        **Project Repository**
 
         [View on GitHub](https://github.com/411sst/Stock-Analyzer)
         """)
 
     with col2:
         st.markdown("""
-        **🌐 Live Application**
+        **Live Application**
 
         [Try the App](https://411-stock-analyzer.streamlit.app)
         """)
 
     with col3:
         st.markdown("""
-        **📧 Contact**
+        **Contact**
 
         [GitHub Profile](https://github.com/411sst)
         """)
 
     # Footer
     st.markdown("""
-    <div style="background-color: #1a1a1a; padding: 30px; border-radius: 12px; margin-top: 40px; text-align: center;">
-        <h3 style="color: #667eea;">Built for Advanced Data Analytics Course 2024</h3>
-        <p style="color: #a0a0a0; margin-top: 10px;">
+    <div style="
+        background-color: var(--color-bg-secondary);
+        padding: 32px;
+        border-radius: 8px;
+        margin-top: 40px;
+        text-align: center;
+        border: 1px solid var(--color-border-subtle);
+    ">
+        <h3 style="
+            color: var(--color-accent-primary);
+            font-family: var(--font-ui);
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+        ">Built for Advanced Data Analytics Course 2024</h3>
+        <p style="
+            color: var(--color-text-secondary);
+            margin: 0 0 16px 0;
+            font-family: var(--font-ui);
+            font-size: 14px;
+            line-height: 1.6;
+        ">
             Demonstrating practical application of Data Science, Predictive Analytics,
             Time Series Modeling, and Statistical Analysis
         </p>
-        <p style="color: #808080; font-size: 0.9em; margin-top: 20px;">
+        <p style="
+            color: var(--color-text-tertiary);
+            font-size: 12px;
+            margin: 0;
+            font-family: var(--font-ui);
+            letter-spacing: 0.02em;
+        ">
             Technologies: Python • Machine Learning • Deep Learning • Statistical Modeling • Data Visualization
         </p>
     </div>

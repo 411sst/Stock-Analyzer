@@ -58,7 +58,7 @@ def portfolio_tracker_page():
     
     elif action == "Import CSV":
         st.subheader("Import Portfolio from CSV")
-        st.info("📄 Upload a CSV file with columns: symbol, quantity, buy_price, buy_date")
+        st.info("Upload a CSV file with columns: symbol, quantity, buy_price, buy_date")
         
         # Show sample format
         with st.expander("View Sample CSV Format"):
@@ -77,18 +77,18 @@ def portfolio_tracker_page():
                 
                 if all(col in df.columns for col in required_columns):
                     st.session_state.portfolio = df.to_dict('records')
-                    st.success("✅ Portfolio imported successfully!")
+                    st.success("Portfolio imported successfully!")
                     st.rerun()
                 else:
-                    st.error(f"❌ CSV must contain these columns: {', '.join(required_columns)}")
+                    st.error(f"CSV must contain these columns: {', '.join(required_columns)}")
             except Exception as e:
-                st.error(f"❌ Error reading CSV file: {str(e)}")
+                st.error(f"Error reading CSV file: {str(e)}")
     
     # View Portfolio
     st.subheader("Your Portfolio")
     
     if not st.session_state.portfolio:
-        st.info("📊 Your portfolio is empty. Add some holdings to get started!")
+        st.info("Your portfolio is empty. Add some holdings to get started!")
         return
     
     # Calculate portfolio value
@@ -159,8 +159,10 @@ def portfolio_tracker_page():
         with col3:
             st.write(f"₹{row['current_price']:.2f}")
         with col4:
-            color = "🟢" if row['p_and_l'] >= 0 else "🔴"
-            st.write(f"{color} ₹{row['p_and_l']:.2f}")
+            if row['p_and_l'] >= 0:
+                st.markdown(f"<span style='color: var(--color-positive); font-family: var(--font-mono); font-weight: 600;'>+₹{row['p_and_l']:.2f}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<span style='color: var(--color-negative); font-family: var(--font-mono); font-weight: 600;'>₹{row['p_and_l']:.2f}</span>", unsafe_allow_html=True)
         with col5:
             st.write(f"{row['return_percentage']:.1f}%")
         with col6:
@@ -176,7 +178,7 @@ def portfolio_tracker_page():
     csv = export_to_csv(st.session_state.portfolio)
     
     st.download_button(
-        label="📥 Download Portfolio as CSV",
+        label="Download Portfolio as CSV",
         data=csv,
         file_name="my_portfolio.csv",
         mime="text/csv",

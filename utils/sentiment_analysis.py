@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from textblob import TextBlob
+from utils.chart_config import apply_chart_theme, get_semantic_colors
 
 def analyze_sentiment(text):
     """Analyze sentiment of text using TextBlob with enhanced classification"""
@@ -39,15 +40,30 @@ def create_sentiment_trend_chart(news_data):
         template='plotly_dark'
     )
 
-    # Unified styling
-    fig.update_traces(line=dict(color='var(--color-info)', width=2))
+    # Unified styling with new color scheme
+    fig.update_traces(line=dict(color='#7FC7B7', width=2))
     fig.update_layout(
-        plot_bgcolor='#0F0F0F',
-        paper_bgcolor='#0F0F0F',
-        font=dict(color='var(--color-text-primary)'),
-        xaxis=dict(gridcolor='#242424'),
-        yaxis=dict(gridcolor='#242424'),
-        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
+        plot_bgcolor='#1E1B18',
+        paper_bgcolor='#1E1B18',
+        font=dict(color='#C8C4C9', family='Inter, sans-serif', size=13),
+        xaxis=dict(
+            gridcolor='#626C66',
+            gridwidth=1,
+            tickfont=dict(color='#9A969B', size=11)
+        ),
+        yaxis=dict(
+            gridcolor='#626C66',
+            gridwidth=1,
+            tickfont=dict(color='#9A969B', size=11)
+        ),
+        hoverlabel=dict(
+            bgcolor='#2A2622',
+            bordercolor='#7A8479',
+            font=dict(color='#FFFAFF', family='JetBrains Mono, monospace', size=12)
+        ),
+        title=dict(
+            font=dict(color='#FFFAFF', size=16, family='Inter, sans-serif')
+        )
     )
     
     return fig
@@ -120,9 +136,9 @@ def create_sector_sentiment_chart(news_data):
     sorted_sectors = sorted(avg_scores.keys(), key=lambda x: abs(avg_scores[x]), reverse=True)
     sorted_scores = [avg_scores[sector] for sector in sorted_sectors]
     
-    # Discrete color by sign using semantic variables
+    # Discrete color by sign using new color scheme
     bar_colors = [
-        ('var(--color-positive)' if s > 0.05 else 'var(--color-negative)' if s < -0.05 else 'var(--color-text-secondary)')
+        ('#7FC7B7' if s > 0.05 else '#3B020A' if s < -0.05 else '#626C66')
         for s in sorted_scores
     ]
 
@@ -135,12 +151,30 @@ def create_sector_sentiment_chart(news_data):
     )
     fig.update_traces(marker_color=bar_colors)
     fig.update_layout(
-        plot_bgcolor='#0F0F0F',
-        paper_bgcolor='#0F0F0F',
-        font=dict(color='var(--color-text-primary)'),
-        xaxis=dict(gridcolor='#242424'),
-        yaxis=dict(gridcolor='#242424'),
-        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
+        plot_bgcolor='#1E1B18',
+        paper_bgcolor='#1E1B18',
+        font=dict(color='#C8C4C9', family='Inter, sans-serif', size=13),
+        xaxis=dict(
+            gridcolor='#626C66',
+            gridwidth=1,
+            tickfont=dict(color='#9A969B', size=11)
+        ),
+        yaxis=dict(
+            gridcolor='#626C66',
+            gridwidth=1,
+            tickfont=dict(color='#9A969B', size=11),
+            zeroline=True,
+            zerolinecolor='#626C66',
+            zerolinewidth=1
+        ),
+        hoverlabel=dict(
+            bgcolor='#2A2622',
+            bordercolor='#7A8479',
+            font=dict(color='#FFFAFF', family='JetBrains Mono, monospace', size=12)
+        ),
+        title=dict(
+            font=dict(color='#FFFAFF', size=16, family='Inter, sans-serif')
+        )
     )
     
     # Add custom annotations for strong sentiments
@@ -151,8 +185,8 @@ def create_sector_sentiment_chart(news_data):
                 y=score,
                 text=f"{score:.2f}",
                 showarrow=False,
-                font=dict(size=12, color='var(--color-text-primary)'),
-                bgcolor='rgba(0,0,0,0.5)',
+                font=dict(size=12, color='#FFFAFF', family='JetBrains Mono, monospace'),
+                bgcolor='rgba(30, 27, 24, 0.9)',
                 borderpad=4
             )
     
@@ -226,14 +260,12 @@ def create_market_buzz_chart(news_data):
         title='Market Buzz Index',
         template='plotly_dark'
     )
-    fig.update_traces(marker_color='var(--color-info)')
-    fig.update_layout(
-        plot_bgcolor='#0F0F0F',
-        paper_bgcolor='#0F0F0F',
-        font=dict(color='var(--color-text-primary)'),
-        xaxis=dict(gridcolor='#242424'),
-        yaxis=dict(gridcolor='#242424'),
-        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
-    )
-    
+
+    # Use semantic colors from chart_config
+    colors = get_semantic_colors()
+    fig.update_traces(marker_color=colors['accent'])
+
+    # Apply professional chart theme using utility
+    fig = apply_chart_theme(fig, title='Market Buzz Index')
+
     return fig

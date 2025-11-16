@@ -17,7 +17,7 @@ class AuthHandler:
             # Fallback to environment variable (for local development)
             self.db_url = os.getenv("DATABASE_URL")
             if not self.db_url:
-                st.error("❌ Database connection string not found!")
+                st.error("Database connection string not found!")
                 st.info("Please add your PostgreSQL connection string to Streamlit secrets.")
                 st.stop()
         
@@ -25,7 +25,7 @@ class AuthHandler:
         if self._test_connection():
             self._initialize_db()
         else:
-            st.error("❌ Cannot connect to database!")
+            st.error("Cannot connect to database!")
             st.stop()
 
     def _test_connection(self):

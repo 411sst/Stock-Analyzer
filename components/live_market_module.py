@@ -105,7 +105,7 @@ def live_market_page():
                 y=plot_df['Close'].astype(float),
                 mode='lines',
                 name='NIFTY 50',
-                line=dict(color='#3b82f6', width=3),
+                line=dict(color='#7FC7B7', width=3),
                 hovertemplate='Time: %{x}<br>Price: ₹%{y:.2f}<extra></extra>'
             )
         )
@@ -113,8 +113,28 @@ def live_market_page():
             height=320,
             margin=dict(l=10, r=10, t=10, b=10),
             template='plotly_dark',
-            xaxis=dict(gridcolor='#242424', showline=False, zeroline=False),
-            yaxis=dict(gridcolor='#242424', showline=False, zeroline=False),
+            plot_bgcolor='#1E1B18',
+            paper_bgcolor='#1E1B18',
+            font=dict(color='#C8C4C9', family='Inter, sans-serif', size=13),
+            xaxis=dict(
+                gridcolor='#626C66',
+                gridwidth=1,
+                showline=False,
+                zeroline=False,
+                tickfont=dict(color='#9A969B', size=11)
+            ),
+            yaxis=dict(
+                gridcolor='#626C66',
+                gridwidth=1,
+                showline=False,
+                zeroline=False,
+                tickfont=dict(color='#9A969B', size=11)
+            ),
+            hoverlabel=dict(
+                bgcolor='#2A2622',
+                bordercolor='#7A8479',
+                font=dict(color='#FFFAFF', family='JetBrains Mono, monospace', size=12)
+            )
         )
         st.plotly_chart(fig, use_container_width=True)
 

@@ -73,12 +73,12 @@ def stock_analysis_page():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("### 🔽 Support Levels")
+        st.markdown("### Support Levels")
         for i, level in enumerate(supports):
             st.metric(f"Support {i+1}", f"₹{level:.2f}")
-    
+
     with col2:
-        st.markdown("### 🔼 Resistance Levels")
+        st.markdown("### Resistance Levels")
         for i, level in enumerate(resistances):
             st.metric(f"Resistance {i+1}", f"₹{level:.2f}")
     
@@ -99,13 +99,18 @@ def stock_analysis_page():
             elif "MACD" in signal['reason']:
                 confidence = 70
             
-            # Always show detailed signals by default (global modes removed)
+            # Professional signal cards with new color scheme
+            signal_class = 'buy' if signal['type'] == 'BUY' else 'sell'
             st.markdown(f"""
-            <div style='padding: 10px; border-left: 4px solid {'green' if signal['type'] == 'BUY' else 'red'}; margin: 10px 0;'>
-                <strong>{signal['type']} Signal (Confidence: {confidence}%)</strong><br>
-                {signal['reason']}, RSI(14)={latest['RSI']:.2f} [{ 'Oversold' if latest['RSI'] < 30 else 'Overbought' if latest['RSI'] > 70 else 'Neutral' }], 
-                MACD { 'bullish' if latest['MACD'] > latest['MACD_signal'] else 'bearish' } crossover, 
-                Volume: {(latest['Volume']/latest['Vol_MA']*100):.0f}% of avg
+            <div class="signal-card {signal_class}">
+                <strong style="color: var(--color-text-primary); font-family: var(--font-ui); font-size: 14px; font-weight: 600;">
+                    {signal['type']} Signal (Confidence: {confidence}%)
+                </strong><br>
+                <span style="color: var(--color-text-secondary); font-family: var(--font-ui); font-size: 13px; line-height: 1.6;">
+                    {signal['reason']}, RSI(14)={latest['RSI']:.2f} [{ 'Oversold' if latest['RSI'] < 30 else 'Overbought' if latest['RSI'] > 70 else 'Neutral' }],
+                    MACD { 'bullish' if latest['MACD'] > latest['MACD_signal'] else 'bearish' } crossover,
+                    Volume: {(latest['Volume']/latest['Vol_MA']*100):.0f}% of avg
+                </span>
             </div>
             """, unsafe_allow_html=True)
     else:
