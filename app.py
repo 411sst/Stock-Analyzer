@@ -25,21 +25,14 @@ except Exception:
 
 st.set_page_config(
     page_title="AI-Powered Stock Analytics Platform | Advanced Data Analytics Project",
-    page_icon="📊",
+    page_icon="▲",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-st.markdown(
-    """
-<style>
-.sidebar-title h1 { margin: 0 0 8px 0 !important; }
-.auth-container { background-color: #1A1A1A; padding: 12px 16px 16px 16px; border-radius: 8px; border: 1px solid #2A2A2A; }
-.user-info { padding: 16px; background-color: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 8px; margin: 8px 0 16px 0; }
-</style>
-""",
-    unsafe_allow_html=True,
-)
+# Load centralized CSS
+with open('assets/styles.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
@@ -110,56 +103,11 @@ def create_password_strength_indicator(password):
 
 # Sidebar Content
 with st.sidebar:
-    st.markdown(
-        """
-        <style>
-            .sidebar-title h1 {
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .auth-container {
-                background-color: #1A1A1A;
-                padding: 10px 14px;
-                border-radius: 8px;
-                border: 1px solid #2A2A2A;
-                margin-top: 8px;
-            }
-            .user-info {
-                padding: 12px 14px;
-                background-color: #1A1A1A;
-                border: 1px solid #2A2A2A;
-                border-radius: 8px;
-                margin: 8px 0;
-            }
-            .block-container {
-                padding-top: 0rem !important;
-            }
-            .stTabs [data-baseweb="tab-list"] {
-                gap: 20px;
-                margin-bottom: 4px;
-            }
-            .stTabs [data-baseweb="tab"] {
-                font-weight: 600;
-                color: #aaa;
-            }
-            .stTabs [data-baseweb="tab"][aria-selected="true"] {
-                color: #ef4444;
-                border-bottom: 2px solid #ef4444;
-            }
-            hr {
-                margin: 12px 0;
-                border-color: #333;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
     # Sidebar Title
     st.markdown('''
         <div class="sidebar-title">
-            <h1 style="margin-bottom: 2px;">📊 Stock Analytics</h1>
-            <p style="font-size: 12px; color: #888; margin: 0;">Advanced Data Analytics Project</p>
+            <h1 style="margin-bottom: 2px; color: var(--color-text-primary);">Stock Analytics</h1>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">Advanced Data Analytics Project</p>
         </div>
     ''', unsafe_allow_html=True)
 
@@ -180,7 +128,7 @@ with st.sidebar:
                 with col1:
                     remember_me = st.checkbox("Remember me", value=True, key="remember_me")
                 with col2:
-                    st.markdown('<small><a href="#" style="color:#3b82f6;">Forgot?</a></small>', unsafe_allow_html=True)
+                    st.markdown('<small><a href="#" style="color:var(--color-accent-primary);">Forgot?</a></small>', unsafe_allow_html=True)
 
                 if st.button("Login", use_container_width=True, key="login_btn"):
                     if username and password:
@@ -240,12 +188,12 @@ with st.sidebar:
                 <div class="user-info">
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <div>
-                            <h4 style="margin:0;">{user['username']}</h4>
-                            <small>{user['email']}</small><br>
-                            <small>Last login: {user.get('last_login','Never')}</small>
+                            <h4 style="margin:0;color:var(--color-text-primary);">{user['username']}</h4>
+                            <small style="color:var(--color-text-secondary);">{user['email']}</small><br>
+                            <small style="color:var(--color-text-tertiary);">Last login: {user.get('last_login','Never')}</small>
                         </div>
-                        <div style="background-color:#333;padding:5px 10px;border-radius:12px;font-size:11px;">
-                            Premium User
+                        <div style="background-color:var(--color-bg-tertiary);padding:6px 12px;border-radius:4px;font-size:11px;color:var(--color-accent-primary);font-weight:600;letter-spacing:0.03em;">
+                            PREMIUM
                         </div>
                     </div>
                 </div>
@@ -285,10 +233,10 @@ with st.sidebar:
     # --- Footer ---
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown(
-        '''<p style="text-align:center;color:#666;font-size:11px;">
-        📚 Advanced Data Analytics<br>
+        '''<p style="text-align:center;color:var(--color-text-tertiary);font-size:11px;font-family:var(--font-ui);">
+        ADVANCED DATA ANALYTICS<br>
         Course Project 2024<br>
-        <span style="color:#888;">Python • ML • Time Series • Statistical Modeling</span>
+        <span style="color:var(--color-text-secondary);font-size:10px;letter-spacing:0.05em;">Python • ML • Time Series • Statistical Modeling</span>
         </p>''',
         unsafe_allow_html=True
     )

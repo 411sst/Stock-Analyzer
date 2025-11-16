@@ -1,0 +1,623 @@
+/* ===================================
+   STOCK ANALYZER - PROFESSIONAL THEME
+   Dark Mode Only - Financial Platform
+   Version: 2.0
+   Last Updated: 2025-11-16
+   =================================== */
+
+/* CSS Variables - New Professional Palette */
+:root {
+    /* Background Colors */
+    --color-bg-primary: #1E1B18;        /* Main background - Deep Charcoal Brown */
+    --color-bg-secondary: #2A2622;      /* Cards, elevated surfaces */
+    --color-bg-tertiary: #363229;       /* Hover states */
+    --color-bg-elevated: #423D33;       /* Modals, overlays */
+
+    /* Border Colors */
+    --color-border-subtle: #626C66;     /* Default borders - Cool Sage Gray */
+    --color-border-default: #7A8479;    /* Hover state borders */
+    --color-border-strong: #929E92;     /* Focus state borders */
+
+    /* Text Colors */
+    --color-text-primary: #FFFAFF;      /* Primary text - Soft Off-White */
+    --color-text-secondary: #C8C4C9;    /* Secondary text */
+    --color-text-tertiary: #9A969B;     /* Tertiary text */
+    --color-text-disabled: #6C686D;     /* Disabled text */
+
+    /* Accent Colors */
+    --color-accent-primary: #7FC7B7;    /* Main accent - Sage Teal */
+    --color-accent-hover: #96D4C6;      /* Accent hover */
+    --color-accent-active: #6BB0A0;     /* Accent active */
+    --color-accent-subtle: #4A9080;     /* Accent subtle */
+
+    /* Semantic Colors */
+    --color-positive: #7FC7B7;          /* Gains, success */
+    --color-positive-bg: #1F2E2A;       /* Positive background tint */
+    --color-negative: #B91C28;          /* Losses, errors (lightened for contrast) */
+    --color-negative-dark: #3B020A;     /* Dark burgundy for backgrounds */
+    --color-negative-bg: #1F0D0F;       /* Negative background tint */
+    --color-warning: #C89F5F;           /* Warnings */
+    --color-warning-bg: #2A251D;        /* Warning background tint */
+    --color-info: #7FC7B7;              /* Info */
+
+    /* Chart-Specific Colors */
+    --color-chart-line-primary: #7FC7B7;
+    --color-chart-line-secondary: #C89F5F;
+    --color-chart-positive: #7FC7B7;
+    --color-chart-negative: #3B020A;
+    --color-chart-grid: #626C66;
+    --color-chart-axis: #9A969B;
+
+    /* Transparency Variants */
+    --color-overlay: rgba(30, 27, 24, 0.85);
+    --color-accent-10: rgba(127, 199, 183, 0.1);
+    --color-accent-20: rgba(127, 199, 183, 0.2);
+    --color-negative-10: rgba(59, 2, 10, 0.1);
+    --color-negative-20: rgba(59, 2, 10, 0.2);
+
+    /* Spacing Scale */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-xxl: 48px;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    /* Typography */
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================
+   GLOBAL STYLES
+   =================================== */
+
+.stApp {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-ui);
+}
+
+/* ===================================
+   TYPOGRAPHY
+   =================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-ui);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+
+h3 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+p {
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-text-primary);
+}
+
+/* ===================================
+   SIDEBAR
+   =================================== */
+
+.sidebar-title h1 {
+    margin: 0 0 8px 0 !important;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.auth-container {
+    background-color: var(--color-bg-secondary);
+    padding: 12px 16px 16px 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-subtle);
+}
+
+.user-info {
+    padding: 16px;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    margin: 8px 0 16px 0;
+}
+
+/* ===================================
+   CARDS
+   =================================== */
+
+.card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: all var(--transition-normal);
+}
+
+.card:hover {
+    border-color: var(--color-border-default);
+    background-color: var(--color-bg-tertiary);
+}
+
+.card-compact {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+}
+
+/* ===================================
+   METRICS
+   =================================== */
+
+.metric-card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    transition: all var(--transition-normal);
+}
+
+.metric-card:hover {
+    border-color: var(--color-border-default);
+}
+
+.metric-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.metric-value {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    margin-bottom: var(--space-xs);
+}
+
+.metric-delta {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-delta.positive {
+    color: var(--color-positive);
+}
+
+.metric-delta.negative {
+    color: var(--color-negative);
+}
+
+.metric-delta.neutral {
+    color: var(--color-warning);
+}
+
+/* ===================================
+   BUTTONS
+   =================================== */
+
+.stButton > button {
+    background-color: var(--color-accent-primary);
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 14px;
+    transition: all var(--transition-normal);
+    letter-spacing: 0.02em;
+    cursor: pointer;
+}
+
+.stButton > button:hover {
+    background-color: var(--color-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(127, 199, 183, 0.2);
+}
+
+.stButton > button:active {
+    background-color: var(--color-accent-active);
+    transform: translateY(0);
+}
+
+.stButton > button:disabled {
+    background-color: var(--color-border-subtle);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Secondary Button */
+.stButton.secondary > button {
+    background-color: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-default);
+}
+
+.stButton.secondary > button:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-accent-primary);
+    transform: none;
+}
+
+/* ===================================
+   FORMS
+   =================================== */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea,
+.stTextInput > div > div > input,
+.stSelectbox > div > div > select,
+.stNumberInput > div > div > input {
+    background-color: var(--color-bg-secondary) !important;
+    border: 1px solid var(--color-border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--color-text-primary) !important;
+    padding: var(--space-sm) var(--space-md) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 14px !important;
+    transition: all var(--transition-normal) !important;
+}
+
+input:hover,
+.stTextInput > div > div > input:hover,
+.stSelectbox > div > div > select:hover {
+    border-color: var(--color-border-default) !important;
+}
+
+input:focus,
+.stTextInput > div > div > input:focus,
+.stSelectbox > div > div > select:focus {
+    border-color: var(--color-accent-primary) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(127, 199, 183, 0.15) !important;
+}
+
+/* ===================================
+   TABLES
+   =================================== */
+
+table {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+thead th {
+    background-color: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border-subtle);
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    text-align: right;
+}
+
+thead th:first-child {
+    text-align: left;
+}
+
+tbody td {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-border-subtle);
+    font-size: 14px;
+    text-align: right;
+    color: var(--color-text-primary);
+}
+
+tbody td:first-child {
+    text-align: left;
+    font-family: var(--font-ui);
+    font-weight: 500;
+}
+
+tbody tr:hover td {
+    background-color: var(--color-bg-tertiary);
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===================================
+   TABS
+   =================================== */
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 20px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.stTabs [data-baseweb="tab"] {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    transition: all var(--transition-fast);
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-tertiary);
+}
+
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    color: var(--color-accent-primary);
+    border-bottom: 2px solid var(--color-accent-primary);
+    background-color: transparent;
+}
+
+/* ===================================
+   ALERTS & MESSAGES
+   =================================== */
+
+.success-message {
+    padding: var(--space-md);
+    border-left: 3px solid var(--color-positive);
+    background-color: var(--color-positive-bg);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.error-message {
+    padding: var(--space-md);
+    border-left: 3px solid var(--color-negative);
+    background-color: var(--color-negative-bg);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.warning-message {
+    padding: var(--space-md);
+    border-left: 3px solid var(--color-warning);
+    background-color: var(--color-warning-bg);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.info-message {
+    padding: var(--space-md);
+    border-left: 3px solid var(--color-info);
+    background-color: var(--color-accent-10);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ===================================
+   SIGNAL INDICATORS
+   =================================== */
+
+.signal-card {
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin: var(--space-sm) 0;
+    border-left: 4px solid;
+    font-family: var(--font-ui);
+}
+
+.signal-card.buy {
+    border-left-color: var(--color-positive);
+    background-color: var(--color-positive-bg);
+}
+
+.signal-card.sell {
+    border-left-color: var(--color-negative);
+    background-color: var(--color-negative-bg);
+}
+
+/* ===================================
+   NAVIGATION
+   =================================== */
+
+.nav-item {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-size: 14px;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.nav-item.active {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-accent-primary);
+    border-left: 3px solid var(--color-accent-primary);
+}
+
+/* ===================================
+   DIVIDERS
+   =================================== */
+
+hr {
+    border: none;
+    border-top: 1px solid var(--color-border-subtle);
+    margin: var(--space-lg) 0;
+}
+
+/* ===================================
+   STREAMLIT OVERRIDES
+   =================================== */
+
+.block-container {
+    padding-top: 0rem !important;
+}
+
+/* Radio Buttons */
+.stRadio > div {
+    gap: var(--space-sm);
+}
+
+.stRadio > div > label {
+    background-color: transparent;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.stRadio > div > label:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+/* Checkbox */
+.stCheckbox > label {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    color: var(--color-text-primary);
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.streamlit-expanderHeader:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-default);
+}
+
+/* Progress Bar */
+.stProgress > div > div > div {
+    background-color: var(--color-accent-primary);
+}
+
+/* ===================================
+   UTILITIES
+   =================================== */
+
+.text-primary {
+    color: var(--color-text-primary);
+}
+
+.text-secondary {
+    color: var(--color-text-secondary);
+}
+
+.text-tertiary {
+    color: var(--color-text-tertiary);
+}
+
+.text-positive {
+    color: var(--color-positive);
+}
+
+.text-negative {
+    color: var(--color-negative);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}
+
+.bg-primary {
+    background-color: var(--color-bg-primary);
+}
+
+.bg-secondary {
+    background-color: var(--color-bg-secondary);
+}
+
+.bg-tertiary {
+    background-color: var(--color-bg-tertiary);
+}
+
+/* ===================================
+   RESPONSIVE
+   =================================== */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 24px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    h3 {
+        font-size: 16px;
+    }
+
+    .metric-value {
+        font-size: 24px;
+    }
+}

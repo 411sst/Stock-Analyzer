@@ -76,8 +76,8 @@ def market_overview_page():
     sector_names = [item['sector'] for item in sector_data]
     sector_perf = [item['performance'] for item in sector_data]
     
-    colors = ['var(--color-positive)' if perf > 0 else 'var(--color-negative)' for perf in sector_perf]
-    
+    colors = ['#7FC7B7' if perf > 0 else '#3B020A' for perf in sector_perf]
+
     fig = px.bar(
         x=sector_names,
         y=sector_perf,
@@ -88,12 +88,30 @@ def market_overview_page():
     )
     fig.update_layout(
         template='plotly_dark',
-        plot_bgcolor='#0F0F0F',
-        paper_bgcolor='#0F0F0F',
-        font=dict(color='var(--color-text-primary)'),
-        xaxis=dict(gridcolor='#242424'),
-        yaxis=dict(gridcolor='#242424'),
-        hoverlabel=dict(bgcolor='#1A1A1A', bordercolor='#404040')
+        plot_bgcolor='#1E1B18',
+        paper_bgcolor='#1E1B18',
+        font=dict(color='#C8C4C9', family='Inter, sans-serif', size=13),
+        xaxis=dict(
+            gridcolor='#626C66',
+            gridwidth=1,
+            tickfont=dict(color='#9A969B', size=12)
+        ),
+        yaxis=dict(
+            gridcolor='#626C66',
+            gridwidth=1,
+            tickfont=dict(color='#9A969B', size=12),
+            zeroline=True,
+            zerolinecolor='#626C66',
+            zerolinewidth=1
+        ),
+        hoverlabel=dict(
+            bgcolor='#2A2622',
+            bordercolor='#7A8479',
+            font=dict(color='#FFFAFF', family='JetBrains Mono, monospace', size=13)
+        ),
+        title=dict(
+            font=dict(color='#FFFAFF', size=18, family='Inter, sans-serif')
+        )
     )
     
     st.plotly_chart(fig, use_container_width=True)
