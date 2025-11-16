@@ -56,37 +56,37 @@ def about_project_page():
     with col1:
         st.subheader("Module 1: Data Science Fundamentals")
         st.markdown("""
-        **✅ Implemented Concepts:**
+        **Implemented Concepts:**
         - **Descriptive Analysis**: Summary statistics, distributions, trends
         - **Correlation Analysis**: Price-volume, cross-asset correlations
         - **Data Visualization**: Interactive charts, dashboards
         - **Statistical Measures**: Mean, median, std deviation, quartiles
 
-        **📍 Location**: Market Overview, Stock Analysis pages
+        **Location**: Market Overview, Stock Analysis pages
         """)
 
         st.subheader("Module 3 & 4: Advanced Techniques")
         st.markdown("""
-        **✅ Implemented Concepts:**
+        **Implemented Concepts:**
         - **Ensemble Methods**: Combining multiple ML models
         - **Risk Analytics**: VaR, volatility, stress testing
         - **NLP & Sentiment**: News sentiment analysis
         - **Feature Selection**: Technical indicators, importance ranking
 
-        **📍 Location**: All modules
+        **Location**: All modules
         """)
 
     with col2:
         st.subheader("Module 2: Predictive Analytics")
         st.markdown("""
-        **✅ Implemented Concepts:**
+        **Implemented Concepts:**
         - **Data Preprocessing**: Cleaning, imputation, transformation
         - **Regression Models**: Linear, multiple, non-linear regression
         - **Time Series Analysis**: ARIMA, exponential smoothing
         - **Neural Networks**: LSTM for time series forecasting
         - **Stationarity Testing**: ADF test, differencing
 
-        **📍 Location**: ML Predictions page
+        **Location**: ML Predictions page
         """)
 
     st.divider()

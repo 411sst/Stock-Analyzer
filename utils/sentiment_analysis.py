@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from textblob import TextBlob
+from utils.chart_config import apply_chart_theme, get_semantic_colors
 
 def analyze_sentiment(text):
     """Analyze sentiment of text using TextBlob with enhanced classification"""
@@ -259,29 +260,12 @@ def create_market_buzz_chart(news_data):
         title='Market Buzz Index',
         template='plotly_dark'
     )
-    fig.update_traces(marker_color='#7FC7B7')
-    fig.update_layout(
-        plot_bgcolor='#1E1B18',
-        paper_bgcolor='#1E1B18',
-        font=dict(color='#C8C4C9', family='Inter, sans-serif', size=13),
-        xaxis=dict(
-            gridcolor='#626C66',
-            gridwidth=1,
-            tickfont=dict(color='#9A969B', size=11)
-        ),
-        yaxis=dict(
-            gridcolor='#626C66',
-            gridwidth=1,
-            tickfont=dict(color='#9A969B', size=11)
-        ),
-        hoverlabel=dict(
-            bgcolor='#2A2622',
-            bordercolor='#7A8479',
-            font=dict(color='#FFFAFF', family='JetBrains Mono, monospace', size=12)
-        ),
-        title=dict(
-            font=dict(color='#FFFAFF', size=16, family='Inter, sans-serif')
-        )
-    )
-    
+
+    # Use semantic colors from chart_config
+    colors = get_semantic_colors()
+    fig.update_traces(marker_color=colors['accent'])
+
+    # Apply professional chart theme using utility
+    fig = apply_chart_theme(fig, title='Market Buzz Index')
+
     return fig

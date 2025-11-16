@@ -712,7 +712,7 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                                         hoverinfo='skip'
                                                     ))
                                                     
-                                                    st.success("✅ Confidence bands added!")
+                                                    st.success("Confidence bands added!")
                                                     
                                                 except Exception as band_error:
                                                     st.info(f"Confidence bands skipped: {str(band_error)}")
@@ -900,10 +900,10 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
                                     )
                                     
                                     st.plotly_chart(fallback_fig, use_container_width=True)
-                                    st.success("✅ Emergency fallback chart displayed!")
+                                    st.success("Emergency fallback chart displayed!")
                                     
                                 except Exception as fallback_error:
-                                    st.error(f"❌ Even emergency fallback failed: {fallback_error}")
+                                    st.error(f"Even emergency fallback failed: {fallback_error}")
                                     st.info("Please contact support with the error details above.")
 
                         # Risk Analysis Dashboard
