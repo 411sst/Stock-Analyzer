@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import yfinance as yf
 from components.market_overview_module import market_overview_page
 from components.stock_analysis_module import stock_analysis_page
+from components.stock_comparison_module import stock_comparison_page
 from components.portfolio_tracker_module import portfolio_tracker_page
 from components.news_sentiment_module import news_sentiment_page
 from components.live_market_module import live_market_page
@@ -212,9 +213,9 @@ with st.sidebar:
     # --- Navigation Section ---
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown("### Navigation")
-    nav_options = ["About This Project", "Live Market", "Market Overview", "Stock Analysis", "Portfolio Tracker", "News & Sentiment"]
+    nav_options = ["About This Project", "Live Market", "Market Overview", "Stock Analysis", "Stock Comparison", "Portfolio Tracker", "News & Sentiment"]
     if ENHANCED_FEATURES and st.session_state.logged_in:
-        nav_options.insert(6, "ML Predictions")  # Insert before potential User Settings
+        nav_options.insert(7, "ML Predictions")  # Insert before potential User Settings
 
     selected_nav = st.radio("Select a page", nav_options, label_visibility="collapsed", key="sidebar_nav")
 
@@ -254,6 +255,9 @@ elif selected_nav == "Live Market":
 elif selected_nav == "Stock Analysis":
     stock_analysis_page()
 
+elif selected_nav == "Stock Comparison":
+    stock_comparison_page()
+
 elif selected_nav == "Portfolio Tracker":
     portfolio_tracker_page()
 
@@ -265,9 +269,9 @@ elif selected_nav == "ML Predictions" and ENHANCED_FEATURES:
         st.warning("Please login to access ML-powered predictions.")
         st.info("Register for free to unlock advanced AI features")
     else:
-        st.title("🤖 AI-Powered Stock Predictions & Risk Analysis")
+        st.title("AI-Powered Stock Predictions & Risk Analysis")
         st.markdown("*Demonstrating Time Series Forecasting, Ensemble Methods, and Statistical Risk Analysis*")
-        st.info("💡 This module showcases **ARIMA**, **LSTM Neural Networks**, **Ensemble Learning**, and **Value-at-Risk (VaR)** techniques from the course syllabus.")
+        st.info("This module showcases **ARIMA**, **LSTM Neural Networks**, **Ensemble Learning**, and **Value-at-Risk (VaR)** techniques from the course syllabus.")
 
         # Stock selection
         col1, col2 = st.columns([2, 1])
