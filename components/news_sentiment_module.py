@@ -122,9 +122,9 @@ def news_sentiment_page():
     
     st.markdown("#### How Sentiment Analysis Works")
     st.write("Our system uses natural language processing to analyze the sentiment of news articles. Here's how we classify them:")
-    st.write("- 📈 Positive: Articles with positive sentiment score above +0.3")
-    st.write("- 📉 Negative: Articles with negative sentiment score below -0.3")
-    st.write("- 📊 Neutral: Articles with sentiment score between -0.3 and +0.3")
+    st.write("- Positive: Articles with positive sentiment score above +0.3")
+    st.write("- Negative: Articles with negative sentiment score below -0.3")
+    st.write("- Neutral: Articles with sentiment score between -0.3 and +0.3")
     
     st.markdown("#### Sentiment Score Distribution")
     st.info("Histogram showing distribution of sentiment scores would appear here in a full implementation.")
