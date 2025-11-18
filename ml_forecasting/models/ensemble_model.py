@@ -4,6 +4,15 @@ import streamlit as st
 from datetime import datetime, timedelta
 import warnings
 import hashlib
+import sys
+from pathlib import Path
+
+# Import artifact manager
+try:
+    from ml_forecasting.models.artifact_manager import ModelArtifactManager
+    _HAS_ARTIFACT_MANAGER = True
+except ImportError:
+    _HAS_ARTIFACT_MANAGER = False
 
 # Optional heavy libraries (guarded imports)
 try:
@@ -29,7 +38,7 @@ except Exception:
 warnings.filterwarnings('ignore')
 
 class EnsembleModel:
-    def __init__(self):
+    def __init__(self, use_cached_models=True):
         self.models = {
             'moving_average': self._moving_average_model,
             'linear_trend': self._linear_trend_model,
@@ -56,6 +65,13 @@ class EnsembleModel:
             'sk_random_forest': 0.08 if _HAS_SKLEARN else 0,
             'tf_lstm': 0.04 if _HAS_TF else 0
         }
+
+        # Initialize artifact manager for model caching
+        self.use_cached_models = use_cached_models
+        if _HAS_ARTIFACT_MANAGER and use_cached_models:
+            self.artifact_manager = ModelArtifactManager()
+        else:
+            self.artifact_manager = None
     
     def _create_deterministic_seed(self, data, symbol=None, steps=7):
         """Create a deterministic seed based on input data characteristics"""
@@ -249,12 +265,32 @@ class EnsembleModel:
     # Heavy model integrations
     # ------------------------
 
-    def _arima_model(self, data, steps, seed):
+    def _arima_model(self, data, steps, seed, symbol=None):
         """ARIMA(p,d,q) with tiny grid search and ADF-based differencing.
-        Deterministic via fixed results and seeded numpy.
+        Uses cached model if available, otherwise trains new model.
         """
         if not _HAS_STATSMODELS or len(data) < 30:
             return np.full(steps, data.iloc[-1]), 0.5
+
+        # Try to load cached model
+        if self.artifact_manager and symbol:
+            cached_model, metadata = self.artifact_manager.load_model(symbol, 'arima')
+            if cached_model is not None and not self.artifact_manager.is_model_stale(symbol, 'arima', max_age_days=7):
+                try:
+                    fc = cached_model.forecast(steps=steps)
+                    preds = np.array(fc, dtype=float)
+                    base = float(data.iloc[-1])
+                    preds = np.nan_to_num(preds, nan=base)
+                    preds = np.where(preds <= 0, base * 0.9, preds)
+
+                    # Use cached confidence if available
+                    conf = metadata.get('validation', {}).get('direction_accuracy_mean', 70.0) / 100.0
+                    conf = max(0.45, min(0.85, conf))
+                    return preds, conf
+                except Exception:
+                    pass  # Fall through to training
+
+        # Train new model
         try:
             np.random.seed(seed + 10)
             series = pd.Series(data.values, index=data.index)
@@ -338,9 +374,34 @@ class EnsembleModel:
         except Exception:
             return np.full(steps, data.iloc[-1]), 0.5
 
-    def _sklearn_rf_model(self, data, steps, seed):
+    def _sklearn_rf_model(self, data, steps, seed, symbol=None):
         if not _HAS_SKLEARN or len(data) < 50:
             return np.full(steps, data.iloc[-1]), 0.5
+
+        # Try to load cached model
+        if self.artifact_manager and symbol:
+            cached_model, metadata = self.artifact_manager.load_model(symbol, 'random_forest')
+            if cached_model is not None and not self.artifact_manager.is_model_stale(symbol, 'random_forest', max_age_days=7):
+                try:
+                    look_back = metadata.get('look_back', 15)
+                    X, y = self._build_lag_features(data.values, look_back)
+                    if len(X) > 0:
+                        window = list(X[-1])
+                        preds = []
+                        for _ in range(steps):
+                            inp = np.array(window[-look_back:]).reshape(1, -1)
+                            yhat = float(cached_model.predict(inp)[0])
+                            preds.append(yhat)
+                            window.append(yhat)
+
+                        # Use cached confidence
+                        conf = metadata.get('validation', {}).get('direction_accuracy_mean', 75.0) / 100.0
+                        conf = max(0.4, min(0.85, conf))
+                        return np.array(preds), conf
+                except Exception:
+                    pass  # Fall through to training
+
+        # Train new model
         try:
             np.random.seed(seed + 30)
             X, y = self._build_lag_features(data.values, look_back=15)
@@ -374,9 +435,39 @@ class EnsembleModel:
         except Exception:
             return np.full(steps, data.iloc[-1]), 0.5
 
-    def _tf_lstm_model(self, data, steps, seed):
+    def _tf_lstm_model(self, data, steps, seed, symbol=None):
         if not (_HAS_TF and len(data) >= 60):
             return np.full(steps, data.iloc[-1]), 0.45
+
+        # Try to load cached model and scaler
+        if self.artifact_manager and symbol and _HAS_SKLEARN:
+            cached_model, metadata = self.artifact_manager.load_model(symbol, 'lstm')
+            cached_scaler = self.artifact_manager.load_scaler(symbol, 'lstm')
+            if cached_model is not None and cached_scaler is not None:
+                if not self.artifact_manager.is_model_stale(symbol, 'lstm', max_age_days=7):
+                    try:
+                        look_back = metadata.get('look_back', 20)
+                        scaled = cached_scaler.transform(data.values.reshape(-1, 1)).flatten()
+
+                        window = scaled[-look_back:].tolist()
+                        preds_scaled = []
+                        for _ in range(steps):
+                            arr = np.array(window[-look_back:]).reshape((1, look_back, 1))
+                            yhat = float(cached_model.predict(arr, verbose=0)[0, 0])
+                            preds_scaled.append(yhat)
+                            window.append(yhat)
+
+                        preds = cached_scaler.inverse_transform(np.array(preds_scaled).reshape(-1, 1)).flatten()
+
+                        # Use cached confidence
+                        conf = metadata.get('validation', {}).get('direction_accuracy_mean', 70.0) / 100.0
+                        conf = max(0.35, min(0.8, conf))
+                        preds = np.where(preds <= 0, data.iloc[-1] * 0.9, preds)
+                        return preds, conf
+                    except Exception:
+                        pass  # Fall through to training
+
+        # Train new model
         try:
             # Deterministic seeds
             np.random.seed(seed + 40)
@@ -612,10 +703,14 @@ class EnsembleModel:
             # Generate predictions from each model using deterministic seed
             predictions = {}
             confidences = {}
-            
+
             for model_name, model_func in self.models.items():
                 try:
-                    pred, conf = model_func(data, steps, deterministic_seed)
+                    # Pass symbol to heavy models for caching
+                    if model_name in ['arima', 'sk_random_forest', 'tf_lstm']:
+                        pred, conf = model_func(data, steps, deterministic_seed, symbol)
+                    else:
+                        pred, conf = model_func(data, steps, deterministic_seed)
                     pred = np.array(pred).flatten()
                     if len(pred) == steps and not np.any(np.isnan(pred)) and not np.any(np.isinf(pred)):
                         predictions[model_name] = pred

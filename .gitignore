@@ -24,6 +24,13 @@ __pycache__/
 *.sqlite3
 data/users.db
 
+# Model artifacts (trained models can be large)
+models/saved/
+*.pkl
+*.h5
+*.joblib
+*.pth
+
 # IDE and OS files
 .vscode/
 .idea/
